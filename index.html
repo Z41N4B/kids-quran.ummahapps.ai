@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quran Stars</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #2b2240;
+    --ink-soft: #6b6283;
+    --card: #ffffff;
+    --shadow: 0 8px 24px rgba(40, 20, 80, .18);
+    --accent: #8b5cf6;
+    --bg: linear-gradient(180deg, #ff8fcf 0%, #b48cf2 50%, #6ab7ff 100%);
+  }
+  body[data-theme="rainbow"] { --bg: linear-gradient(180deg, #ff8fcf 0%, #b48cf2 50%, #6ab7ff 100%); --accent: #8b5cf6; }
+  body[data-theme="sky"]     { --bg: linear-gradient(180deg, #7cc8ff 0%, #a9e0ff 100%); --accent: #2f8fe0; }
+  body[data-theme="mint"]    { --bg: linear-gradient(180deg, #6fdcb2 0%, #b6f0d6 100%); --accent: #1fa776; }
+  body[data-theme="sunny"]   { --bg: linear-gradient(180deg, #ffd25e 0%, #ffeaa3 100%); --accent: #e59a00; }
+  body[data-theme="peach"]   { --bg: linear-gradient(180deg, #ff9f80 0%, #ffd0b8 100%); --accent: #ea6a3f; }
+  body[data-theme="lilac"]   { --bg: linear-gradient(180deg, #b79cff 0%, #ded2ff 100%); --accent: #7c4ddb; }
+  body[data-theme="night"]   { --bg: linear-gradient(180deg, #1f2357 0%, #3b2f7a 100%); --accent: #a78bfa; }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: "Fredoka", system-ui, sans-serif;
+    color: var(--ink);
+    background: #b48cf2;
+    overflow-x: hidden;
+  }
+  /* fixed background layer so the gradient stays put while scrolling */
+  .bg { position: fixed; inset: 0; background: var(--bg); z-index: -1; transition: opacity .3s; }
+
+  button { font-family: inherit; cursor: pointer; border: 0; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 16px 16px 48px; }
+
+  /* ---------- theme picker ---------- */
+  .themes {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+    background: rgba(255,255,255,.55); backdrop-filter: blur(6px);
+    padding: 10px 14px; border-radius: 999px; width: fit-content; margin: 0 auto;
+    box-shadow: var(--shadow);
+  }
+  .swatch {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    transition: transform .15s;
+  }
+  .swatch:hover { transform: scale(1.1); }
+  .swatch.on { outline: 4px solid var(--ink); outline-offset: 2px; transform: scale(1.12); }
+  .swatch[data-t="rainbow"] { background: linear-gradient(180deg, #ff8fcf, #b48cf2, #6ab7ff); }
+  .swatch[data-t="sky"]     { background: #7cc8ff; }
+  .swatch[data-t="mint"]    { background: #6fdcb2; }
+  .swatch[data-t="sunny"]   { background: #ffd25e; }
+  .swatch[data-t="peach"]   { background: #ff9f80; }
+  .swatch[data-t="lilac"]   { background: #b79cff; }
+  .swatch[data-t="night"]   { background: #2a2b6b; }
+
+  /* ---------- home ---------- */
+  .hero { text-align: center; margin: 12px 0 20px; }
+  .hero h1 {
+    font-size: clamp(2.2rem, 7vw, 3.4rem); margin: 6px 0 2px; color: #fff;
+    text-shadow: 0 3px 0 rgba(0,0,0,.15), 0 6px 18px rgba(0,0,0,.18);
+    letter-spacing: .5px;
+  }
+  .hero p { margin: 0 0 16px; color: #fff; font-size: 1.15rem; font-weight: 500; text-shadow: 0 2px 6px rgba(0,0,0,.2); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; margin-top: 22px; }
+  .card {
+    background: var(--card); border-radius: 28px; padding: 18px 18px 16px;
+    box-shadow: var(--shadow); text-align: left; color: var(--ink);
+    display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden;
+    transition: transform .15s;
+  }
+  .card:hover { transform: translateY(-4px) rotate(-.5deg); }
+  .card:active { transform: scale(.97); }
+  .card .blob { position: absolute; right: -24px; top: -24px; width: 110px; height: 110px; border-radius: 50%; opacity: .22; }
+  .card .emoji { font-size: 2.4rem; line-height: 1; }
+  .card .ar { font-family: "Amiri Quran", serif; font-size: 2rem; direction: rtl; text-align: right; line-height: 1.6; margin-top: -40px; }
+  .card .en { font-size: 1.4rem; font-weight: 700; }
+  .card .meaning { color: var(--ink-soft); font-size: 1rem; margin-top: -4px; }
+  .card .meta { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; font-size: .95rem; color: var(--ink-soft); }
+  .bar { height: 12px; background: #eee8f7; border-radius: 99px; overflow: hidden; margin-top: 4px; }
+  .bar i { display: block; height: 100%; border-radius: 99px; transition: width .4s; }
+  .done-badge { position: absolute; left: 14px; bottom: 44px; font-size: 1.4rem; }
+
+  /* ---------- reader ---------- */
+  .topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .back {
+    width: 54px; height: 54px; border-radius: 50%; background: #fff; font-size: 1.6rem;
+    box-shadow: var(--shadow); color: var(--ink); flex: none;
+  }
+  .title-pill {
+    flex: 1; background: #fff; border-radius: 999px; padding: 8px 20px; box-shadow: var(--shadow);
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0;
+  }
+  .title-pill .en { font-weight: 700; font-size: 1.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .title-pill .ar { font-family: "Amiri Quran", serif; font-size: 1.6rem; direction: rtl; }
+  .palette-btn { width: 54px; height: 54px; border-radius: 50%; background: #fff; font-size: 1.5rem; box-shadow: var(--shadow); flex: none; }
+  .reader-themes { display: none; margin-bottom: 14px; }
+  .reader-themes.open { display: flex; }
+
+  .controls {
+    position: sticky; top: 8px; z-index: 5;
+    background: rgba(255,255,255,.92); backdrop-filter: blur(8px);
+    border-radius: 24px; padding: 12px; box-shadow: var(--shadow);
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+  }
+  .big-btn {
+    background: var(--accent); color: #fff; font-weight: 600; font-size: 1.15rem;
+    padding: 12px 22px; border-radius: 999px; box-shadow: 0 4px 0 rgba(0,0,0,.18);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .big-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.18); }
+  .group { display: flex; align-items: center; gap: 6px; background: #f3effa; padding: 6px 8px; border-radius: 999px; }
+  .group span { font-size: .95rem; color: var(--ink-soft); padding: 0 4px; }
+  .chip { background: #fff; color: var(--ink); font-weight: 600; min-width: 40px; height: 40px; border-radius: 999px; padding: 0 10px; font-size: 1rem; }
+  .chip.on { background: var(--accent); color: #fff; }
+  .toggle { background: #f3effa; color: var(--ink); font-weight: 600; padding: 10px 16px; border-radius: 999px; font-size: 1rem; }
+  .toggle.on { background: var(--ink); color: #fff; }
+
+  .basmala {
+    font-family: "Amiri Quran", serif; text-align: center; font-size: clamp(1.6rem, 5vw, 2.2rem);
+    background: rgba(255,255,255,.75); border-radius: 22px; padding: 6px 12px 14px; margin-bottom: 14px;
+    direction: rtl;
+  }
+
+  .ayahs { display: flex; flex-direction: column; gap: 14px; }
+  .ayah {
+    background: #fff; border-radius: 26px; padding: 14px 14px 12px; box-shadow: var(--shadow);
+    display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: center;
+    border: 4px solid transparent; transition: border-color .2s, transform .2s;
+  }
+  .ayah.playing { border-color: var(--accent); transform: scale(1.015); }
+  .ayah.learned { background: linear-gradient(0deg, #fffbe6, #fff); }
+  .num {
+    width: 46px; height: 46px; border-radius: 50%; background: var(--accent); color: #fff;
+    display: grid; place-items: center; font-weight: 700; font-size: 1.2rem; grid-row: span 2; align-self: start;
+  }
+  .text {
+    font-family: "Amiri Quran", serif; direction: rtl; text-align: right;
+    font-size: clamp(1.7rem, 5.6vw, 2.5rem); line-height: 2.1; cursor: pointer;
+    transition: filter .25s;
+  }
+  body.hide-words .ayah:not(.peek) .text { filter: blur(11px); user-select: none; }
+  .actions { display: flex; gap: 8px; justify-content: flex-start; }
+  .act {
+    height: 46px; min-width: 46px; border-radius: 999px; background: #f3effa; font-size: 1.3rem; padding: 0 14px;
+    display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-weight: 600;
+  }
+  .act.play.on { background: var(--accent); color: #fff; }
+  .act.star { font-size: 1.4rem; filter: grayscale(1) opacity(.5); }
+  .act.star.on { filter: none; background: #fff3c4; }
+  .reps { font-size: .95rem; color: var(--ink-soft); margin-left: auto; align-self: center; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 120px);
+    background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 999px; font-size: 1.05rem;
+    box-shadow: var(--shadow); transition: transform .3s; z-index: 50; max-width: calc(100% - 32px); text-align: center;
+  }
+  .toast.show { transform: translate(-50%, 0); }
+
+  .confetti { position: fixed; top: -40px; font-size: 2rem; z-index: 60; pointer-events: none; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(540deg); } }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 520px) {
+    .swatch { width: 34px; height: 34px; }
+    .themes { gap: 8px; padding: 8px 12px; }
+    .big-btn { font-size: 1.05rem; padding: 10px 18px; }
+    .title-pill .ar { display: none; }
+  }
+</style>
+</head>
+<body data-theme="rainbow">
+<div class="bg"></div>
+
+<!-- ============ HOME ============ -->
+<main id="home" class="wrap">
+  <section class="hero">
+    <h1>⭐ Quran Stars ⭐</h1>
+    <p>Pick a surah and let's learn it together!</p>
+    <div class="themes" data-themes></div>
+  </section>
+  <section class="grid" id="grid"></section>
+</main>
+
+<!-- ============ READER ============ -->
+<main id="reader" class="wrap hidden">
+  <div class="topbar">
+    <button class="back" id="backBtn" aria-label="Back to surahs"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="title-pill"><span class="en" id="rTitle"></span><span class="ar" id="rTitleAr"></span></div>
+    <button class="palette-btn" id="paletteBtn" aria-label="Change colors">🎨</button>
+  </div>
+  <div class="themes reader-themes" data-themes id="readerThemes"></div>
+
+  <div class="controls">
+    <button class="big-btn" id="playAll">▶ Play all</button>
+    <div class="group" aria-label="Repeat each part">
+      <span>Repeat</span>
+      <button class="chip" data-rep="1">1</button>
+      <button class="chip" data-rep="3">3</button>
+      <button class="chip" data-rep="5">5</button>
+      <button class="chip" data-rep="10">10</button>
+    </div>
+    <button class="toggle" id="hideBtn">🙈 Hide words</button>
+  </div>
+
+  <div class="basmala" id="basmala">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+  <section class="ayahs" id="ayahs"></section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Surah data ----------
+   Audio goes in: audio/<id>/<number>.mp3  (e.g. audio/fatiha/1.mp3) */
+const SURAHS = [
+  { id: "fatiha", en: "Al-Fatiha", ar: "الفاتحة", meaning: "The Opening", emoji: "🌟", color: "#ff7eb6", basmala: false, unit: "Ayah",
+    ayahs: [
+      "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+      "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+      "الرَّحْمَٰنِ الرَّحِيمِ",
+      "مَالِكِ يَوْمِ الدِّينِ",
+      "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
+      "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
+      "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ"
+    ] },
+  { id: "ikhlas", en: "Al-Ikhlas", ar: "الإخلاص", meaning: "Sincerity", emoji: "💎", color: "#8b7bff", basmala: true, unit: "Ayah",
+    ayahs: [
+      "قُلْ هُوَ اللَّهُ أَحَدٌ",
+      "اللَّهُ الصَّمَدُ",
+      "لَمْ يَلِدْ وَلَمْ يُولَدْ",
+      "وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ"
+    ] },
+  { id: "falaq", en: "Al-Falaq", ar: "الفلق", meaning: "The Daybreak", emoji: "🌅", color: "#ffa54f", basmala: true, unit: "Ayah",
+    ayahs: [
+      "قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ",
+      "مِن شَرِّ مَا خَلَقَ",
+      "وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ",
+      "وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ",
+      "وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ"
+    ] },
+  { id: "nas", en: "An-Nas", ar: "الناس", meaning: "Mankind", emoji: "🤲", color: "#3fbf8f", basmala: true, unit: "Ayah",
+    ayahs: [
+      "قُلْ أَعُوذُ بِرَبِّ النَّاسِ",
+      "مَلِكِ النَّاسِ",
+      "إِلَٰهِ النَّاسِ",
+      "مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ",
+      "الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ",
+      "مِنَ الْجِنَّةِ وَالنَّاسِ"
+    ] },
+  { id: "kawthar", en: "Al-Kawthar", ar: "الكوثر", meaning: "The Abundance", emoji: "🌊", color: "#4aa8ff", basmala: true, unit: "Ayah",
+    ayahs: [
+      "إِنَّا أَعْطَيْنَاكَ الْكَوْثَرَ",
+      "فَصَلِّ لِرَبِّكَ وَانْحَرْ",
+      "إِنَّ شَانِئَكَ هُوَ الْأَبْتَرُ"
+    ] },
+  { id: "kursi", en: "Ayatul Kursi", ar: "آية الكرسي", meaning: "The Throne Verse · 9 parts", emoji: "👑", color: "#c76bff", basmala: false, unit: "Part",
+    ayahs: [
+      "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ",
+      "لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ",
+      "لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ",
+      "مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ",
+      "يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ",
+      "وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ",
+      "وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ",
+      "وَلَا يَئُودُهُ حِفْظُهُمَا",
+      "وَهُوَ الْعَلِيُّ الْعَظِيمُ"
+    ],
+    /* one recording of the whole ayah; each part plays from its start time to the next one (seconds) */
+    clips: { file: "audio/kursi/full.mp3", times: [0.2, 7.93, 14.09, 18.26, 25.11, 30.11, 39.08, 43.38, 46.41, null] } }
+];
+
+const THEMES = ["rainbow", "sky", "mint", "sunny", "peach", "lilac", "night"];
+const THEME_NAMES = { rainbow: "Pink to blue", sky: "Sky blue", mint: "Mint green", sunny: "Sunshine", peach: "Peach", lilac: "Lilac", night: "Night sky" };
+
+/* ---------- saved settings (safe if storage is blocked) ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("qs-" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("qs-" + k, JSON.stringify(v)); } catch {} }
+};
+let progress = store.get("progress", {});
+let repeat = store.get("repeat", 3);
+
+/* ---------- themes ---------- */
+function setTheme(t) {
+  document.body.dataset.theme = t;
+  document.querySelectorAll(".swatch").forEach(s => s.classList.toggle("on", s.dataset.t === t));
+  store.set("theme", t);
+}
+document.querySelectorAll("[data-themes]").forEach(box => {
+  box.innerHTML = THEMES.map(t => `<button class="swatch" data-t="${t}" aria-label="${THEME_NAMES[t]}" title="${THEME_NAMES[t]}"></button>`).join("");
+});
+document.addEventListener("click", e => { const s = e.target.closest(".swatch"); if (s) setTheme(s.dataset.t); });
+setTheme(store.get("theme", "rainbow"));
+
+/* ---------- home ---------- */
+function learnedCount(id) { return (progress[id] || []).length; }
+function renderHome() {
+  document.getElementById("grid").innerHTML = SURAHS.map(s => {
+    const n = learnedCount(s.id), total = s.ayahs.length, pct = Math.round(n / total * 100);
+    return `<button class="card" data-open="${s.id}">
+      <div class="blob" style="background:${s.color}"></div>
+      <div class="emoji">${s.emoji}</div>
+      <div class="ar">${s.ar}</div>
+      <div class="en">${s.en}</div>
+      <div class="meaning">${s.meaning}</div>
+      <div class="meta"><span>${total} ${s.unit === "Part" ? "parts" : "ayahs"}</span><span>${n === total ? "🏆 Learned!" : "⭐ " + n + " / " + total}</span></div>
+      <div class="bar"><i style="width:${pct}%;background:${s.color}"></i></div>
+    </button>`;
+  }).join("");
+}
+document.getElementById("grid").addEventListener("click", e => {
+  const c = e.target.closest("[data-open]"); if (c) openSurah(c.dataset.open);
+});
+
+/* ---------- reader ---------- */
+let surah = null;
+const ayahBox = document.getElementById("ayahs");
+
+function openSurah(id) {
+  surah = SURAHS.find(s => s.id === id);
+  stopAudio();
+  document.getElementById("rTitle").textContent = surah.en;
+  document.getElementById("rTitleAr").textContent = surah.ar;
+  document.getElementById("basmala").classList.toggle("hidden", !surah.basmala);
+  renderAyahs();
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("reader").classList.remove("hidden");
+  window.scrollTo(0, 0);
+  history.pushState({ surah: id }, "", "#" + id);
+}
+function goHome() {
+  stopAudio();
+  document.getElementById("reader").classList.add("hidden");
+  document.getElementById("home").classList.remove("hidden");
+  document.getElementById("readerThemes").classList.remove("open");
+  renderHome();
+}
+document.getElementById("backBtn").onclick = () => history.back();
+window.addEventListener("popstate", () => {
+  const id = location.hash.slice(1);
+  if (SURAHS.some(s => s.id === id)) openSurah(id); else goHome();
+});
+document.getElementById("paletteBtn").onclick = () => document.getElementById("readerThemes").classList.toggle("open");
+
+function renderAyahs() {
+  const learned = progress[surah.id] || [];
+  ayahBox.innerHTML = surah.ayahs.map((t, i) => `
+    <article class="ayah ${learned.includes(i) ? "learned" : ""}" data-i="${i}">
+      <div class="num">${i + 1}</div>
+      <div class="text">${t}</div>
+      <div class="actions">
+        <button class="act play" data-play="${i}" aria-label="Play ${surah.unit} ${i + 1}">▶</button>
+        <button class="act star ${learned.includes(i) ? "on" : ""}" data-star="${i}" aria-label="I learned this">⭐</button>
+        <span class="reps" id="reps-${i}"></span>
+      </div>
+    </article>`).join("");
+}
+
+ayahBox.addEventListener("click", e => {
+  const p = e.target.closest("[data-play]");
+  const s = e.target.closest("[data-star]");
+  const t = e.target.closest(".text");
+  if (p) {
+    const i = +p.dataset.play;
+    if (current === i && !audio.paused) stopAudio(); else playAyah(i, false);
+  } else if (s) {
+    toggleLearned(+s.dataset.star);
+  } else if (t && document.body.classList.contains("hide-words")) {
+    const row = t.closest(".ayah");
+    row.classList.add("peek");
+    setTimeout(() => row.classList.remove("peek"), 2500);
+  } else if (t) {
+    playAyah(+t.closest(".ayah").dataset.i, false);
+  }
+});
+
+function toggleLearned(i) {
+  const list = new Set(progress[surah.id] || []);
+  list.has(i) ? list.delete(i) : list.add(i);
+  progress[surah.id] = [...list];
+  store.set("progress", progress);
+  const row = ayahBox.querySelector(`[data-i="${i}"]`);
+  row.classList.toggle("learned", list.has(i));
+  row.querySelector(".star").classList.toggle("on", list.has(i));
+  if (list.has(i)) {
+    if (list.size === surah.ayahs.length) { celebrate(30); toast(`🏆 MashaAllah! You learned all of ${surah.en}!`); }
+    else { celebrate(8); toast("⭐ Great job!"); }
+  }
+}
+
+/* repeat chips */
+function setRepeat(n) {
+  repeat = n; store.set("repeat", n);
+  document.querySelectorAll("[data-rep]").forEach(c => c.classList.toggle("on", +c.dataset.rep === n));
+}
+document.querySelectorAll("[data-rep]").forEach(c => c.onclick = () => setRepeat(+c.dataset.rep));
+setRepeat(repeat);
+
+/* hide words (test yourself) */
+document.getElementById("hideBtn").onclick = e => {
+  const on = document.body.classList.toggle("hide-words");
+  e.currentTarget.classList.toggle("on", on);
+  e.currentTarget.textContent = on ? "👀 Show words" : "🙈 Hide words";
+  if (on) toast("Tap a hidden line to peek 👀");
+};
+
+/* ---------- audio ---------- */
+const audio = new Audio();
+let current = -1, timesLeft = 0, playingAll = false;
+
+function src(id, i) { return `audio/${id}/${i + 1}.mp3`; }
+
+function playAyah(i, all) {
+  playingAll = all;
+  current = i;
+  timesLeft = repeat;
+  const file = surah.clips ? surah.clips.file : src(surah.id, i);
+  if (!audio.src.endsWith(file)) audio.src = file;
+  startCurrent();
+}
+function startCurrent() {
+  highlight();
+  const t = surah.clips ? surah.clips.times[current] : 0;
+  const go = () => { audio.currentTime = t; audio.play().catch(() => {}); };
+  audio.readyState >= 1 ? go() : audio.addEventListener("loadedmetadata", go, { once: true });
+}
+/* for clip-based surahs, stop when the part's end time is reached */
+function watchClip() {
+  if (!surah || !surah.clips || current < 0 || audio.paused) return;
+  const end = surah.clips.times[current + 1];
+  if (end != null && audio.currentTime >= end) { audio.pause(); return partEnded(); }
+  requestAnimationFrame(watchClip);
+}
+audio.addEventListener("playing", () => requestAnimationFrame(watchClip));
+function highlight() {
+  ayahBox.querySelectorAll(".ayah").forEach(a => {
+    const on = +a.dataset.i === current;
+    a.classList.toggle("playing", on);
+    a.querySelector(".play").classList.toggle("on", on);
+    a.querySelector(".play").textContent = on ? "⏸" : "▶";
+  });
+  surah && surah.ayahs.forEach((_, i) => {
+    const r = document.getElementById("reps-" + i);
+    if (r) r.textContent = i === current && repeat > 1 ? `🔁 ${repeat - timesLeft + 1} / ${repeat}` : "";
+  });
+  const row = ayahBox.querySelector(".ayah.playing");
+  if (row) row.scrollIntoView({ behavior: "smooth", block: "center" });
+  document.getElementById("playAll").textContent = playingAll ? "⏹ Stop" : "▶ Play all";
+}
+function stopAudio() {
+  audio.pause();
+  current = -1; playingAll = false;
+  if (surah) highlight();
+}
+audio.addEventListener("ended", partEnded);
+function partEnded() {
+  timesLeft--;
+  if (timesLeft > 0) return setTimeout(startCurrent, 600);
+  if (playingAll && current < surah.ayahs.length - 1) {
+    const next = current + 1;
+    return setTimeout(() => playAyah(next, true), 700);
+  }
+  stopAudio();
+}
+audio.addEventListener("error", () => {
+  if (current < 0) return;
+  toast(`🎧 Recording for ${surah.unit.toLowerCase()} ${current + 1} is coming soon!`);
+  stopAudio();
+});
+document.getElementById("playAll").onclick = () => playingAll ? stopAudio() : playAyah(0, true);
+
+/* ---------- fun bits ---------- */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
+}
+function celebrate(n) {
+  const bits = ["⭐", "🌟", "✨", "💖", "💙", "💜", "🎉"];
+  for (let k = 0; k < n; k++) {
+    const el = document.createElement("div");
+    el.className = "confetti";
+    el.textContent = bits[k % bits.length];
+    el.style.left = Math.random() * 100 + "vw";
+    el.style.animationDuration = 1.8 + Math.random() * 1.6 + "s";
+    el.style.animationDelay = Math.random() * .4 + "s";
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+}
+
+/* ---------- start ---------- */
+renderHome();
+const startId = location.hash.slice(1);
+if (SURAHS.some(s => s.id === startId)) { history.replaceState(null, "", location.pathname); openSurah(startId); }
+</script>
+</body>
+</html>
