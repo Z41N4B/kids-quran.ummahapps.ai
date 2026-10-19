@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Quran Stars</title>
+<title>Learning Surahs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -16,12 +16,12 @@
     --bg: linear-gradient(180deg, #ff8fcf 0%, #b48cf2 50%, #6ab7ff 100%);
   }
   body[data-theme="rainbow"] { --bg: linear-gradient(180deg, #ff8fcf 0%, #b48cf2 50%, #6ab7ff 100%); --accent: #8b5cf6; }
-  body[data-theme="sky"]     { --bg: linear-gradient(180deg, #7cc8ff 0%, #a9e0ff 100%); --accent: #2f8fe0; }
-  body[data-theme="mint"]    { --bg: linear-gradient(180deg, #6fdcb2 0%, #b6f0d6 100%); --accent: #1fa776; }
-  body[data-theme="sunny"]   { --bg: linear-gradient(180deg, #ffd25e 0%, #ffeaa3 100%); --accent: #e59a00; }
-  body[data-theme="peach"]   { --bg: linear-gradient(180deg, #ff9f80 0%, #ffd0b8 100%); --accent: #ea6a3f; }
-  body[data-theme="lilac"]   { --bg: linear-gradient(180deg, #b79cff 0%, #ded2ff 100%); --accent: #7c4ddb; }
-  body[data-theme="night"]   { --bg: linear-gradient(180deg, #1f2357 0%, #3b2f7a 100%); --accent: #a78bfa; }
+  body[data-theme="sky"] { --bg: linear-gradient(180deg, #5ab8ff 0%, #b8f0ff 100%); --accent: #2f8fe0; }
+  body[data-theme="mint"] { --bg: linear-gradient(180deg, #4fd1a5 0%, #fff59d 100%); --accent: #1fa776; }
+  body[data-theme="sunny"] { --bg: linear-gradient(180deg, #ffb347 0%, #ffe680 100%); --accent: #e08a00; }
+  body[data-theme="peach"] { --bg: linear-gradient(180deg, #ff8a80 0%, #ffd1a8 100%); --accent: #ea6a3f; }
+  body[data-theme="lilac"] { --bg: linear-gradient(180deg, #a17cff 0%, #ffb8e6 100%); --accent: #7c4ddb; }
+  body[data-theme="night"] { --bg: linear-gradient(180deg, #1f2357 0%, #6b4fbf 100%); --accent: #a78bfa; }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; min-height: 100%; }
@@ -51,13 +51,13 @@
   }
   .swatch:hover { transform: scale(1.1); }
   .swatch.on { outline: 4px solid var(--ink); outline-offset: 2px; transform: scale(1.12); }
-  .swatch[data-t="rainbow"] { background: linear-gradient(180deg, #ff8fcf, #b48cf2, #6ab7ff); }
-  .swatch[data-t="sky"]     { background: #7cc8ff; }
-  .swatch[data-t="mint"]    { background: #6fdcb2; }
-  .swatch[data-t="sunny"]   { background: #ffd25e; }
-  .swatch[data-t="peach"]   { background: #ff9f80; }
-  .swatch[data-t="lilac"]   { background: #b79cff; }
-  .swatch[data-t="night"]   { background: #2a2b6b; }
+  .swatch[data-t="rainbow"] { background: linear-gradient(180deg, #ff8fcf 0%, #b48cf2 50%, #6ab7ff 100%); }
+  .swatch[data-t="sky"] { background: linear-gradient(180deg, #5ab8ff 0%, #b8f0ff 100%); }
+  .swatch[data-t="mint"] { background: linear-gradient(180deg, #4fd1a5 0%, #fff59d 100%); }
+  .swatch[data-t="sunny"] { background: linear-gradient(180deg, #ffb347 0%, #ffe680 100%); }
+  .swatch[data-t="peach"] { background: linear-gradient(180deg, #ff8a80 0%, #ffd1a8 100%); }
+  .swatch[data-t="lilac"] { background: linear-gradient(180deg, #a17cff 0%, #ffb8e6 100%); }
+  .swatch[data-t="night"] { background: linear-gradient(180deg, #1f2357 0%, #6b4fbf 100%); }
 
   /* ---------- home ---------- */
   .hero { text-align: center; margin: 12px 0 20px; }
@@ -129,6 +129,12 @@
     direction: rtl;
   }
 
+  .basmala { cursor: pointer; border: 4px solid transparent; }
+  .basmala.playing { border-color: var(--accent); }
+  .basmala .tr { direction: ltr; font-family: "Fredoka", sans-serif; font-size: 1.2rem; }
+  .spk { font-size: 1.2rem; vertical-align: middle; }
+  .tr { font-size: clamp(1.15rem, 3.6vw, 1.4rem); line-height: 1.5; padding: 6px 0; cursor: pointer; transition: filter .25s; }
+  body:not(.show-en) .tr, body.show-en .ar-only { display: none; }
   .ayahs { display: flex; flex-direction: column; gap: 14px; }
   .ayah {
     background: #fff; border-radius: 26px; padding: 14px 14px 12px; box-shadow: var(--shadow);
@@ -146,7 +152,7 @@
     font-size: clamp(1.7rem, 5.6vw, 2.5rem); line-height: 2.1; cursor: pointer;
     transition: filter .25s;
   }
-  body.hide-words .ayah:not(.peek) .text { filter: blur(11px); user-select: none; }
+  body.hide-words .ayah:not(.peek) .text, body.hide-words .ayah:not(.peek) .tr { filter: blur(11px); user-select: none; }
   .actions { display: flex; gap: 8px; justify-content: flex-start; }
   .act {
     height: 46px; min-width: 46px; border-radius: 999px; background: #f3effa; font-size: 1.3rem; padding: 0 14px;
@@ -183,7 +189,7 @@
 <!-- ============ HOME ============ -->
 <main id="home" class="wrap">
   <section class="hero">
-    <h1>⭐ Quran Stars ⭐</h1>
+    <h1>⭐ Learning Surahs ⭐</h1>
     <p>Pick a surah and let's learn it together!</p>
     <div class="themes" data-themes></div>
   </section>
@@ -209,9 +215,11 @@
       <button class="chip" data-rep="10">10</button>
     </div>
     <button class="toggle" id="hideBtn">🙈 Hide words</button>
+    <button class="toggle" id="slowBtn">🐢 Play slowly</button>
+    <button class="toggle" id="langBtn">🔤 Translation</button>
   </div>
 
-  <div class="basmala" id="basmala">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+  <div class="basmala" id="basmala"><span class="ar-only">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span><span class="tr">In the name of Allah, the Entirely Merciful, the Especially Merciful.</span> <span class="spk">🔊</span></div>
   <section class="ayahs" id="ayahs"></section>
 </main>
 
@@ -261,7 +269,7 @@ const SURAHS = [
       "فَصَلِّ لِرَبِّكَ وَانْحَرْ",
       "إِنَّ شَانِئَكَ هُوَ الْأَبْتَرُ"
     ] },
-  { id: "kursi", en: "Ayatul Kursi", ar: "آية الكرسي", meaning: "The Throne Verse · 9 parts", emoji: "👑", color: "#c76bff", basmala: false, unit: "Part",
+  { id: "kursi", en: "Ayatul Kursi", ar: "آية الكرسي", meaning: "The Throne Verse · 10 parts", emoji: "👑", color: "#c76bff", basmala: false, unit: "Part",
     ayahs: [
       "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ",
       "لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ",
@@ -276,6 +284,19 @@ const SURAHS = [
     /* one recording of the whole ayah; each part plays from its start time to the next one (seconds) */
     clips: { file: "audio/kursi/full.mp3", times: [0.2, 7.93, 14.09, 18.26, 25.11, 30.11, 39.08, 43.38, 46.41, null] } }
 ];
+
+/* Saheeh International translation */
+const TR = {
+  fatiha: ["In the name of Allah, the Entirely Merciful, the Especially Merciful.","[All] praise is [due] to Allah, Lord of the worlds -","The Entirely Merciful, the Especially Merciful,","Sovereign of the Day of Recompense.","It is You we worship and You we ask for help.","Guide us to the straight path -","The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray."],
+  ikhlas: ["Say, \"He is Allah, [who is] One,","Allah, the Eternal Refuge.","He neither begets nor is born,","Nor is there to Him any equivalent.\""],
+  falaq: ["Say, \"I seek refuge in the Lord of daybreak","From the evil of that which He created","And from the evil of darkness when it settles","And from the evil of the blowers in knots","And from the evil of an envier when he envies.\""],
+  nas: ["Say, \"I seek refuge in the Lord of mankind,","The Sovereign of mankind.","The God of mankind,","From the evil of the retreating whisperer -","Who whispers [evil] into the breasts of mankind -","From among the jinn and mankind.\""],
+  kawthar: ["Indeed, We have granted you, [O Muhammad], al-Kawthar.","So pray to your Lord and sacrifice [to Him alone].","Indeed, your enemy is the one cut off."],
+  kursi: ["Allah - there is no deity except Him, the Ever-Living, the Sustainer of [all] existence.","Neither drowsiness overtakes Him nor sleep.","To Him belongs whatever is in the heavens and whatever is on the earth.","Who is it that can intercede with Him except by His permission?","He knows what is [presently] before them and what will be after them,","and they encompass not a thing of His knowledge except for what He wills.","His Kursi extends over the heavens and the earth,","and their preservation tires Him not.","And He is the Most High, the Most Great."]
+};
+/* Ayatul Kursi's first part covers sections 1 and 2, so the last one is 10 */
+function label(i, s = surah) { return s && s.id === "kursi" ? (i === 0 ? "1,2" : String(i + 2)) : String(i + 1); }
+function shownTotal(s) { return s.id === "kursi" ? s.ayahs.length + 1 : s.ayahs.length; }
 
 const THEMES = ["rainbow", "sky", "mint", "sunny", "peach", "lilac", "night"];
 const THEME_NAMES = { rainbow: "Pink to blue", sky: "Sky blue", mint: "Mint green", sunny: "Sunshine", peach: "Peach", lilac: "Lilac", night: "Night sky" };
@@ -301,10 +322,13 @@ document.addEventListener("click", e => { const s = e.target.closest(".swatch");
 setTheme(store.get("theme", "rainbow"));
 
 /* ---------- home ---------- */
-function learnedCount(id) { return (progress[id] || []).length; }
+function learnedCount(id) {
+  const s = SURAHS.find(x => x.id === id), l = (progress[id] || []).filter(i => i < s.ayahs.length);
+  return id === "kursi" && l.includes(0) ? l.length + 1 : l.length;
+}
 function renderHome() {
   document.getElementById("grid").innerHTML = SURAHS.map(s => {
-    const n = learnedCount(s.id), total = s.ayahs.length, pct = Math.round(n / total * 100);
+    const n = learnedCount(s.id), total = shownTotal(s), pct = Math.round(n / total * 100);
     return `<button class="card" data-open="${s.id}">
       <div class="blob" style="background:${s.color}"></div>
       <div class="emoji">${s.emoji}</div>
@@ -354,10 +378,11 @@ function renderAyahs() {
   const learned = progress[surah.id] || [];
   ayahBox.innerHTML = surah.ayahs.map((t, i) => `
     <article class="ayah ${learned.includes(i) ? "learned" : ""}" data-i="${i}">
-      <div class="num">${i + 1}</div>
-      <div class="text">${t}</div>
+      <div class="num">${label(i)}</div>
+      <div class="text ar-only">${t}</div>
+      <div class="tr">${TR[surah.id][i]}</div>
       <div class="actions">
-        <button class="act play" data-play="${i}" aria-label="Play ${surah.unit} ${i + 1}">▶</button>
+        <button class="act play" data-play="${i}" aria-label="Play ${surah.unit} ${label(i)}">▶</button>
         <button class="act star ${learned.includes(i) ? "on" : ""}" data-star="${i}" aria-label="I learned this">⭐</button>
         <span class="reps" id="reps-${i}"></span>
       </div>
@@ -367,7 +392,7 @@ function renderAyahs() {
 ayahBox.addEventListener("click", e => {
   const p = e.target.closest("[data-play]");
   const s = e.target.closest("[data-star]");
-  const t = e.target.closest(".text");
+  const t = e.target.closest(".text, .tr");
   if (p) {
     const i = +p.dataset.play;
     if (current === i && !audio.paused) stopAudio(); else playAyah(i, false);
@@ -429,7 +454,7 @@ function playAyah(i, all) {
 function startCurrent() {
   highlight();
   const t = surah.clips ? surah.clips.times[current] : 0;
-  const go = () => { audio.currentTime = t; audio.play().catch(() => {}); };
+  const go = () => { audio.currentTime = t; audio.playbackRate = rate; audio.play().catch(() => {}); };
   audio.readyState >= 1 ? go() : audio.addEventListener("loadedmetadata", go, { once: true });
 }
 /* for clip-based surahs, stop when the part's end time is reached */
@@ -451,7 +476,8 @@ function highlight() {
     const r = document.getElementById("reps-" + i);
     if (r) r.textContent = i === current && repeat > 1 ? `🔁 ${repeat - timesLeft + 1} / ${repeat}` : "";
   });
-  const row = ayahBox.querySelector(".ayah.playing");
+  basmalaEl.classList.toggle("playing", current === -2);
+  const row = current === -2 ? basmalaEl : ayahBox.querySelector(".ayah.playing");
   if (row) row.scrollIntoView({ behavior: "smooth", block: "center" });
   document.getElementById("playAll").textContent = playingAll ? "⏹ Stop" : "▶ Play all";
 }
@@ -462,6 +488,7 @@ function stopAudio() {
 }
 audio.addEventListener("ended", partEnded);
 function partEnded() {
+  if (current === -2) return playingAll ? setTimeout(() => playAyah(0, true), 500) : stopAudio();
   timesLeft--;
   if (timesLeft > 0) return setTimeout(startCurrent, 600);
   if (playingAll && current < surah.ayahs.length - 1) {
@@ -472,10 +499,41 @@ function partEnded() {
 }
 audio.addEventListener("error", () => {
   if (current < 0) return;
-  toast(`🎧 Recording for ${surah.unit.toLowerCase()} ${current + 1} is coming soon!`);
+  toast(`🎧 Recording for ${surah.unit.toLowerCase()} ${label(current)} is coming soon!`);
   stopAudio();
 });
-document.getElementById("playAll").onclick = () => playingAll ? stopAudio() : playAyah(0, true);
+document.getElementById("playAll").onclick = () => playingAll ? stopAudio() : surah.basmala ? playBasmala(true) : playAyah(0, true);
+
+/* Bismillah before each surah, using the recitation from Al-Fatiha */
+const basmalaEl = document.getElementById("basmala");
+function playBasmala(all) {
+  playingAll = all; current = -2;
+  audio.src = "audio/fatiha/1.mp3";
+  audio.playbackRate = rate;
+  highlight();
+  audio.play().catch(() => {});
+}
+basmalaEl.onclick = () => current === -2 && !audio.paused ? stopAudio() : playBasmala(false);
+
+/* play slowly */
+let rate = 1;
+function setSlow(on) {
+  rate = on ? 0.75 : 1;
+  audio.defaultPlaybackRate = rate; audio.playbackRate = rate;
+  document.getElementById("slowBtn").classList.toggle("on", on);
+  store.set("slow", on);
+}
+document.getElementById("slowBtn").onclick = () => setSlow(rate === 1);
+setSlow(store.get("slow", false));
+
+/* Arabic / translation */
+function setLang(en) {
+  document.body.classList.toggle("show-en", en);
+  document.getElementById("langBtn").textContent = en ? "📖 Arabic" : "🔤 Translation";
+  store.set("en", en);
+}
+document.getElementById("langBtn").onclick = () => setLang(!document.body.classList.contains("show-en"));
+setLang(store.get("en", false));
 
 /* ---------- fun bits ---------- */
 let toastTimer;
