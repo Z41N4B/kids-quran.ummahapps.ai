@@ -7,7 +7,7 @@
 <meta name="description" content="A colorful app to help children memorize Al-Fatiha, Al-Ikhlas, Al-Falaq, An-Nas, Al-Kawthar and Ayatul Kursi, with recitation, repeat, slow mode and English translation.">
 <link rel="canonical" href="https://kids-quran.ummahapps.ai/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Inter:wght@400;500;600&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --ink: #2b2240;
@@ -24,6 +24,35 @@
   body[data-theme="peach"] { --bg: linear-gradient(180deg, #ff8a80 0%, #ffd1a8 100%); --accent: #ea6a3f; }
   body[data-theme="lilac"] { --bg: linear-gradient(180deg, #a17cff 0%, #ffb8e6 100%); --accent: #7c4ddb; }
   body[data-theme="night"] { --bg: linear-gradient(180deg, #1f2357 0%, #6b4fbf 100%); --accent: #a78bfa; }
+
+  body[data-theme="emerald"] { --bg: linear-gradient(180deg, #0f3d3e 0%, #1f6f63 100%); --accent: #1f6f63; }
+  .swatch[data-t="emerald"] { background: linear-gradient(180deg, #0f3d3e, #1f6f63); }
+  body[data-theme="sand"] { --bg: linear-gradient(180deg, #f4ecdc 0%, #d8c3a0 100%); --accent: #8a6d3b; --hero: #4a3b22; }
+  .swatch[data-t="sand"] { background: linear-gradient(180deg, #f4ecdc, #d8c3a0); }
+  body[data-theme="slate"] { --bg: linear-gradient(180deg, #2c3e50 0%, #5d7a99 100%); --accent: #34495e; }
+  .swatch[data-t="slate"] { background: linear-gradient(180deg, #2c3e50, #5d7a99); }
+  body[data-theme="midnight"] { --bg: linear-gradient(180deg, #141e30 0%, #2c4a6e 100%); --accent: #3b6aa0; }
+  .swatch[data-t="midnight"] { background: linear-gradient(180deg, #141e30, #2c4a6e); }
+  body[data-theme="plum"] { --bg: linear-gradient(180deg, #3a1c32 0%, #6d3b5e 100%); --accent: #7a3e6a; }
+  .swatch[data-t="plum"] { background: linear-gradient(180deg, #3a1c32, #6d3b5e); }
+
+  /* grown-up style: calmer type, flatter cards, no confetti or stars */
+  body[data-style="adult"] { font-family: "Inter", system-ui, sans-serif; }
+  body[data-style="adult"] .kid-only { display: none; }
+  body[data-style="adult"] .card, body[data-style="adult"] .ayah, body[data-style="adult"] .controls,
+  body[data-style="adult"] .basmala { border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.12); }
+  body[data-style="adult"] .card:hover { transform: translateY(-2px); }
+  body[data-style="adult"] .card .blob { display: none; }
+  body[data-style="adult"] .card .snum, body[data-style="adult"] .bar i { background: var(--accent) !important; }
+  body[data-style="adult"] .hero h1 { font-weight: 600; text-shadow: none; letter-spacing: 0; }
+  body[data-style="adult"] .hero p { text-shadow: none; }
+  body[data-style="adult"] .big-btn, body[data-style="adult"] .big-btn:active { box-shadow: none; transform: none; }
+  body[data-style="adult"] .basmala .tr { font-family: inherit; }
+  .hero h1, .hero p { color: var(--hero, #fff) !important; }
+
+  .style-toggle { display: flex; gap: 4px; background: rgba(255,255,255,.55); backdrop-filter: blur(6px); padding: 5px; border-radius: 999px; width: fit-content; margin: 0 auto 12px; box-shadow: var(--shadow); }
+  .style-toggle button { padding: 8px 18px; border-radius: 999px; background: transparent; font-weight: 600; font-size: 1rem; color: var(--ink); }
+  .style-toggle button.on { background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; min-height: 100%; }
@@ -191,8 +220,12 @@
 <!-- ============ HOME ============ -->
 <main id="home" class="wrap">
   <section class="hero">
-    <h1>⭐ Learning Surahs ⭐</h1>
+    <h1><span class="kid-only">⭐ </span>Learning Surahs<span class="kid-only"> ⭐</span></h1>
     <p>Pick a surah and let's learn it together!</p>
+    <div class="style-toggle" role="group" aria-label="Style">
+      <button data-style="kids">🧸 Kids</button>
+      <button data-style="adult">📖 Adults</button>
+    </div>
     <div class="themes" data-themes></div>
   </section>
   <section class="grid" id="grid"></section>
@@ -312,16 +345,31 @@ let progress = store.get("progress", {});
 let repeat = store.get("repeat", 3);
 
 /* ---------- themes ---------- */
+const ADULT_THEMES = ["emerald", "sand", "slate", "midnight", "plum"];
+Object.assign(THEME_NAMES, { emerald: "Emerald", sand: "Sand", slate: "Slate", midnight: "Midnight", plum: "Plum" });
+const STYLE_THEMES = { kids: THEMES, adult: ADULT_THEMES };
+let style = store.get("style", "kids");
+
 function setTheme(t) {
   document.body.dataset.theme = t;
   document.querySelectorAll(".swatch").forEach(s => s.classList.toggle("on", s.dataset.t === t));
-  store.set("theme", t);
+  store.set("theme-" + style, t);
 }
-document.querySelectorAll("[data-themes]").forEach(box => {
-  box.innerHTML = THEMES.map(t => `<button class="swatch" data-t="${t}" aria-label="${THEME_NAMES[t]}" title="${THEME_NAMES[t]}"></button>`).join("");
+function setStyle(st) {
+  style = st;
+  document.body.dataset.style = st;
+  document.querySelectorAll("[data-style]").forEach(b => b.tagName === "BUTTON" && b.classList.toggle("on", b.dataset.style === st));
+  document.querySelectorAll("[data-themes]").forEach(box => {
+    box.innerHTML = STYLE_THEMES[st].map(t => `<button class="swatch" data-t="${t}" aria-label="${THEME_NAMES[t]}" title="${THEME_NAMES[t]}"></button>`).join("");
+  });
+  store.set("style", st);
+  setTheme(store.get("theme-" + st, STYLE_THEMES[st][0]));
+}
+document.addEventListener("click", e => {
+  const s = e.target.closest(".swatch"); if (s) setTheme(s.dataset.t);
+  const b = e.target.closest(".style-toggle [data-style]"); if (b) setStyle(b.dataset.style);
 });
-document.addEventListener("click", e => { const s = e.target.closest(".swatch"); if (s) setTheme(s.dataset.t); });
-setTheme(store.get("theme", "rainbow"));
+setStyle(style);
 
 /* ---------- home ---------- */
 function learnedCount(id) {
@@ -545,6 +593,7 @@ function toast(msg) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
 }
 function celebrate(n) {
+  if (style === "adult") return;
   const bits = ["⭐", "🌟", "✨", "💖", "💙", "💜", "🎉"];
   for (let k = 0; k < n; k++) {
     const el = document.createElement("div");
