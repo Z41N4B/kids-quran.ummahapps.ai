@@ -36,23 +36,8 @@
   body[data-theme="plum"] { --bg: linear-gradient(180deg, #3a1c32 0%, #6d3b5e 100%); --accent: #7a3e6a; }
   .swatch[data-t="plum"] { background: linear-gradient(180deg, #3a1c32, #6d3b5e); }
 
-  /* grown-up style: calmer type, flatter cards, no confetti or stars */
-  body[data-style="adult"] { font-family: "Inter", system-ui, sans-serif; }
-  body[data-style="adult"] .kid-only { display: none; }
-  body[data-style="adult"] .card, body[data-style="adult"] .ayah, body[data-style="adult"] .controls,
-  body[data-style="adult"] .basmala { border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.12); }
-  body[data-style="adult"] .card:hover { transform: translateY(-2px); }
-  body[data-style="adult"] .card .blob { display: none; }
-  body[data-style="adult"] .card .snum, body[data-style="adult"] .bar i { background: var(--accent) !important; }
-  body[data-style="adult"] .hero h1 { font-weight: 600; text-shadow: none; letter-spacing: 0; }
-  body[data-style="adult"] .hero p { text-shadow: none; }
-  body[data-style="adult"] .big-btn, body[data-style="adult"] .big-btn:active { box-shadow: none; transform: none; }
-  body[data-style="adult"] .basmala .tr { font-family: inherit; }
   .hero h1, .hero p { color: var(--hero, #fff) !important; }
 
-  .style-toggle { display: flex; gap: 4px; background: rgba(255,255,255,.55); backdrop-filter: blur(6px); padding: 5px; border-radius: 999px; width: fit-content; margin: 0 auto 12px; box-shadow: var(--shadow); }
-  .style-toggle button { padding: 8px 18px; border-radius: 999px; background: transparent; font-weight: 600; font-size: 1rem; color: var(--ink); }
-  .style-toggle button.on { background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; min-height: 100%; }
@@ -97,6 +82,7 @@
     text-shadow: 0 3px 0 rgba(0,0,0,.15), 0 6px 18px rgba(0,0,0,.18);
     letter-spacing: .5px;
   }
+  .credit { font-size: .8rem; opacity: .85; margin: 4px 0 0; color: var(--hero, #fff); text-align: center; }
   .hero p { margin: 0 0 16px; color: #fff; font-size: 1.15rem; font-weight: 500; text-shadow: 0 2px 6px rgba(0,0,0,.2); }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; margin-top: 22px; }
@@ -220,13 +206,10 @@
 <!-- ============ HOME ============ -->
 <main id="home" class="wrap">
   <section class="hero">
-    <h1><span class="kid-only">⭐ </span>Learning Surahs<span class="kid-only"> ⭐</span></h1>
+    <h1>⭐ Learning Surahs ⭐</h1>
     <p>Pick a surah and let's learn it together!</p>
-    <div class="style-toggle" role="group" aria-label="Style">
-      <button data-style="kids">🧸 Kids</button>
-      <button data-style="adult">📖 Adults</button>
-    </div>
     <div class="themes" data-themes></div>
+    <p class="credit">Recitation by Sheikh Saad al-Ghamdi</p>
   </section>
   <section class="grid" id="grid"></section>
 </main>
@@ -256,6 +239,7 @@
 
   <div class="basmala" id="basmala"><span class="ar-only">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span><span class="tr">In the name of Allah, the Entirely Merciful, the Especially Merciful.</span> <span class="spk">🔊</span></div>
   <section class="ayahs" id="ayahs"></section>
+  <p class="credit" style="margin-top:16px">Recitation by Sheikh Saad al-Ghamdi</p>
 </main>
 
 <div class="toast" id="toast"></div>
@@ -347,29 +331,19 @@ let repeat = store.get("repeat", 3);
 /* ---------- themes ---------- */
 const ADULT_THEMES = ["emerald", "sand", "slate", "midnight", "plum"];
 Object.assign(THEME_NAMES, { emerald: "Emerald", sand: "Sand", slate: "Slate", midnight: "Midnight", plum: "Plum" });
-const STYLE_THEMES = { kids: THEMES, adult: ADULT_THEMES };
-let style = store.get("style", "kids");
+const ALL_THEMES = THEMES.concat(ADULT_THEMES);
 
 function setTheme(t) {
   document.body.dataset.theme = t;
   document.querySelectorAll(".swatch").forEach(s => s.classList.toggle("on", s.dataset.t === t));
-  store.set("theme-" + style, t);
+  store.set("theme", t);
 }
-function setStyle(st) {
-  style = st;
-  document.body.dataset.style = st;
-  document.querySelectorAll("[data-style]").forEach(b => b.tagName === "BUTTON" && b.classList.toggle("on", b.dataset.style === st));
-  document.querySelectorAll("[data-themes]").forEach(box => {
-    box.innerHTML = STYLE_THEMES[st].map(t => `<button class="swatch" data-t="${t}" aria-label="${THEME_NAMES[t]}" title="${THEME_NAMES[t]}"></button>`).join("");
-  });
-  store.set("style", st);
-  setTheme(store.get("theme-" + st, STYLE_THEMES[st][0]));
-}
-document.addEventListener("click", e => {
-  const s = e.target.closest(".swatch"); if (s) setTheme(s.dataset.t);
-  const b = e.target.closest(".style-toggle [data-style]"); if (b) setStyle(b.dataset.style);
+document.querySelectorAll("[data-themes]").forEach(box => {
+  box.innerHTML = ALL_THEMES.map(t => `<button class="swatch" data-t="${t}" aria-label="${THEME_NAMES[t]}" title="${THEME_NAMES[t]}"></button>`).join("");
 });
-setStyle(style);
+document.addEventListener("click", e => { const s = e.target.closest(".swatch"); if (s) setTheme(s.dataset.t); });
+const saved = store.get("theme", "rainbow");
+setTheme(ALL_THEMES.includes(saved) ? saved : "rainbow");
 
 /* ---------- home ---------- */
 function learnedCount(id) {
@@ -593,7 +567,7 @@ function toast(msg) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
 }
 function celebrate(n) {
-  if (style === "adult") return;
+  n = Math.ceil(n / 2);
   const bits = ["⭐", "🌟", "✨", "💖", "💙", "💜", "🎉"];
   for (let k = 0; k < n; k++) {
     const el = document.createElement("div");
