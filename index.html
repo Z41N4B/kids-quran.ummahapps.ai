@@ -36,6 +36,26 @@
   body[data-theme="plum"] { --bg: linear-gradient(180deg, #3a1c32 0%, #6d3b5e 100%); --accent: #7a3e6a; }
   .swatch[data-t="plum"] { background: linear-gradient(180deg, #3a1c32, #6d3b5e); }
 
+  /* calm colours get a grown-up look: plain type, flatter shapes, no emoji */
+  .adult-only { display: none; }
+  body[data-style="adult"] { font-family: "Inter", system-ui, sans-serif; }
+  body[data-style="adult"] .kid-only, body[data-style="adult"] .emo { display: none; }
+  body[data-style="adult"] .adult-only { display: inline; }
+  body[data-style="adult"] .card, body[data-style="adult"] .ayah, body[data-style="adult"] .controls,
+  body[data-style="adult"] .basmala, body[data-style="adult"] .title-pill { border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.12); }
+  body[data-style="adult"] .card:hover { transform: translateY(-2px); }
+  body[data-style="adult"] .card .blob { display: none; }
+  body[data-style="adult"] .card .snum, body[data-style="adult"] .bar i { background: var(--accent) !important; }
+  body[data-style="adult"] .card .snum, body[data-style="adult"] .num { border-radius: 10px; font-size: 1.05rem; }
+  body[data-style="adult"] .hero h1 { font-weight: 600; font-size: clamp(2rem, 6vw, 2.8rem); text-shadow: none; letter-spacing: 0; }
+  body[data-style="adult"] .hero p { text-shadow: none; font-weight: 400; }
+  body[data-style="adult"] .big-btn { border-radius: 10px; box-shadow: none; font-weight: 500; font-size: 1.05rem; }
+  body[data-style="adult"] .big-btn:active { transform: none; }
+  body[data-style="adult"] .toggle, body[data-style="adult"] .chip, body[data-style="adult"] .act,
+  body[data-style="adult"] .group, body[data-style="adult"] .back, body[data-style="adult"] .palette-btn { border-radius: 10px; font-weight: 500; }
+  body[data-style="adult"] .back, body[data-style="adult"] .palette-btn { box-shadow: 0 2px 10px rgba(0,0,0,.12); }
+  body[data-style="adult"] .basmala .tr { font-family: inherit; }
+  body[data-style="adult"] .themes { border-radius: 14px; }
   .hero h1, .hero p { color: var(--hero, #fff) !important; }
 
 
@@ -82,7 +102,7 @@
     text-shadow: 0 3px 0 rgba(0,0,0,.15), 0 6px 18px rgba(0,0,0,.18);
     letter-spacing: .5px;
   }
-  .credit { font-size: .8rem; opacity: .85; margin: 4px 0 0; color: var(--hero, #fff); text-align: center; }
+  .credit, .hero .credit { font-family: inherit; font-size: .8rem; font-weight: 400; opacity: .85; margin: 6px 0 0; color: var(--hero, #fff); text-align: center; text-shadow: none; }
   .hero p { margin: 0 0 16px; color: #fff; font-size: 1.15rem; font-weight: 500; text-shadow: 0 2px 6px rgba(0,0,0,.2); }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; margin-top: 22px; }
@@ -206,8 +226,8 @@
 <!-- ============ HOME ============ -->
 <main id="home" class="wrap">
   <section class="hero">
-    <h1>⭐ Learning Surahs ⭐</h1>
-    <p>Pick a surah and let's learn it together!</p>
+    <h1><span class="kid-only">⭐ </span>Learning Surahs<span class="kid-only"> ⭐</span></h1>
+    <p><span class="kid-only">Pick a surah and let's learn it together!</span><span class="adult-only">Choose a surah to memorize</span></p>
     <div class="themes" data-themes></div>
     <p class="credit">Recitation by Sheikh Saad al-Ghamdi</p>
   </section>
@@ -232,8 +252,8 @@
       <button class="chip" data-rep="5">5</button>
       <button class="chip" data-rep="10">10</button>
     </div>
-    <button class="toggle" id="hideBtn">🙈 Hide words</button>
-    <button class="toggle" id="slowBtn">🐢 Play slowly</button>
+    <button class="toggle" id="hideBtn"><span class="emo">🙈 </span>Hide words</button>
+    <button class="toggle" id="slowBtn"><span class="emo">🐢 </span>Play slowly</button>
     <button class="toggle" id="langBtn">🔤 Translation</button>
   </div>
 
@@ -248,6 +268,21 @@
 /* ---------- Surah data ----------
    Audio goes in: audio/<id>/<number>.mp3  (e.g. audio/fatiha/1.mp3) */
 const SURAHS = [
+  { id: "asr", en: "Al-Asr", ar: "العصر", meaning: "The Time", num: "103", color: "#ff6f91", basmala: true, unit: "Ayah",
+    ayahs: [
+      "وَالْعَصْرِ",
+      "إِنَّ الْإِنسَانَ لَفِي خُسْرٍ",
+      "إِلَّا الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَتَوَاصَوْا بِالْحَقِّ وَتَوَاصَوْا بِالصَّبْرِ"
+    ] },
+  { id: "kafirun", en: "Al-Kafirun", ar: "الكافرون", meaning: "The Disbelievers", num: "109", color: "#2fb5c9", basmala: true, unit: "Ayah",
+    ayahs: [
+      "قُلْ يَا أَيُّهَا الْكَافِرُونَ",
+      "لَا أَعْبُدُ مَا تَعْبُدُونَ",
+      "وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ",
+      "وَلَا أَنَا عَابِدٌ مَّا عَبَدتُّمْ",
+      "وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ",
+      "لَكُمْ دِينُكُمْ وَلِيَ دِينِ"
+    ] },
   { id: "fatiha", en: "Al-Fatiha", ar: "الفاتحة", meaning: "The Opening", num: "1", color: "#ff7eb6", basmala: false, unit: "Ayah",
     ayahs: [
       "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
@@ -304,8 +339,14 @@ const SURAHS = [
     clips: { file: "audio/kursi/full.mp3", times: [0.2, 7.93, 14.09, 18.26, 25.11, 30.11, 39.08, 43.38, 46.41, null] } }
 ];
 
+/* Mushaf order */
+const ORDER = ["fatiha", "kursi", "asr", "kawthar", "kafirun", "ikhlas", "falaq", "nas"];
+SURAHS.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
+
 /* Saheeh International translation */
 const TR = {
+  asr: ["By time,","Indeed, mankind is in loss,","Except for those who have believed and done righteous deeds and advised each other to truth and advised each other to patience."],
+  kafirun: ["Say, \"O disbelievers,","I do not worship what you worship.","Nor are you worshippers of what I worship.","Nor will I be a worshipper of what you worship.","Nor will you be worshippers of what I worship.","For you is your religion, and for me is my religion.\""],
   fatiha: ["In the name of Allah, the Entirely Merciful, the Especially Merciful.","[All] praise is [due] to Allah, Lord of the worlds -","The Entirely Merciful, the Especially Merciful,","Sovereign of the Day of Recompense.","It is You we worship and You we ask for help.","Guide us to the straight path -","The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray."],
   ikhlas: ["Say, \"He is Allah, [who is] One,","Allah, the Eternal Refuge.","He neither begets nor is born,","Nor is there to Him any equivalent.\""],
   falaq: ["Say, \"I seek refuge in the Lord of daybreak","From the evil of that which He created","And from the evil of darkness when it settles","And from the evil of the blowers in knots","And from the evil of an envier when he envies.\""],
@@ -317,7 +358,7 @@ const TR = {
 function label(i, s = surah) { return s && s.id === "kursi" ? (i === 0 ? "1,2" : String(i + 2)) : String(i + 1); }
 function shownTotal(s) { return s.id === "kursi" ? s.ayahs.length + 1 : s.ayahs.length; }
 
-const THEMES = ["rainbow", "sky", "mint", "sunny", "peach", "lilac", "night"];
+const THEMES = ["rainbow", "sky", "mint", "sunny"];
 const THEME_NAMES = { rainbow: "Pink to blue", sky: "Sky blue", mint: "Mint green", sunny: "Sunshine", peach: "Peach", lilac: "Lilac", night: "Night sky" };
 
 /* ---------- saved settings (safe if storage is blocked) ---------- */
@@ -329,12 +370,13 @@ let progress = store.get("progress", {});
 let repeat = store.get("repeat", 3);
 
 /* ---------- themes ---------- */
-const ADULT_THEMES = ["emerald", "sand", "slate", "midnight", "plum"];
+const ADULT_THEMES = ["emerald", "sand"];
 Object.assign(THEME_NAMES, { emerald: "Emerald", sand: "Sand", slate: "Slate", midnight: "Midnight", plum: "Plum" });
 const ALL_THEMES = THEMES.concat(ADULT_THEMES);
 
 function setTheme(t) {
   document.body.dataset.theme = t;
+  document.body.dataset.style = ADULT_THEMES.includes(t) ? "adult" : "kids";
   document.querySelectorAll(".swatch").forEach(s => s.classList.toggle("on", s.dataset.t === t));
   store.set("theme", t);
 }
@@ -457,7 +499,7 @@ setRepeat(repeat);
 document.getElementById("hideBtn").onclick = e => {
   const on = document.body.classList.toggle("hide-words");
   e.currentTarget.classList.toggle("on", on);
-  e.currentTarget.textContent = on ? "👀 Show words" : "🙈 Hide words";
+  e.currentTarget.innerHTML = on ? '<span class="emo">👀 </span>Show words' : '<span class="emo">🙈 </span>Hide words';
   if (on) toast("Tap a hidden line to peek 👀");
 };
 
@@ -553,7 +595,7 @@ setSlow(store.get("slow", false));
 /* Arabic / translation */
 function setLang(en) {
   document.body.classList.toggle("show-en", en);
-  document.getElementById("langBtn").textContent = en ? "📖 Arabic" : "🔤 Translation";
+  document.getElementById("langBtn").innerHTML = en ? '<span class="emo">📖 </span>Arabic' : '<span class="emo">🔤 </span>Translation';
   store.set("en", en);
 }
 document.getElementById("langBtn").onclick = () => setLang(!document.body.classList.contains("show-en"));

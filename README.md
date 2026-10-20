@@ -2,7 +2,7 @@
 
 A colorful app to help children memorize short surahs of the Quran.
 
-**Surahs:** Al-Fatiha, Al-Ikhlas, Al-Falaq, An-Nas, Al-Kawthar and Ayatul Kursi (in 10 sections).
+**Surahs:** Al-Fatiha, Ayatul Kursi (in 10 sections), Al-Asr, Al-Kawthar, Al-Kafirun, Al-Ikhlas, Al-Falaq and An-Nas.
 
 ## Features
 - Tap any ayah to hear it, or **Play all** to go through the whole surah
