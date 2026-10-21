@@ -595,7 +595,7 @@ setSlow(store.get("slow", false));
 /* Arabic / translation */
 function setLang(en) {
   document.body.classList.toggle("show-en", en);
-  document.getElementById("langBtn").innerHTML = en ? '<span class="emo">📖 </span>Arabic' : '<span class="emo">🔤 </span>Translation';
+  document.getElementById("langBtn").innerHTML = en ? '<span class="emo">📖 </span>Qur'an' : '<span class="emo">🔤 </span>Translation';
   store.set("en", en);
 }
 document.getElementById("langBtn").onclick = () => setLang(!document.body.classList.contains("show-en"));
