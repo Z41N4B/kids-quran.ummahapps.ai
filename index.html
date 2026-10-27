@@ -173,6 +173,10 @@
   .spk { font-size: 1.2rem; vertical-align: middle; }
   .tr { font-size: clamp(1.15rem, 3.6vw, 1.4rem); line-height: 1.5; padding: 6px 0; cursor: pointer; transition: filter .25s; }
   body:not(.show-en) .tr, body.show-en .ar-only { display: none; }
+  .stages { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .stage { background: #fff; color: var(--ink); padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 1rem; box-shadow: var(--shadow); }
+  .stage.on { background: var(--accent); color: #fff; }
+  .stage:disabled { opacity: .6; cursor: not-allowed; }
   .ayahs { display: flex; flex-direction: column; gap: 14px; }
   .ayah {
     background: #fff; border-radius: 26px; padding: 14px 14px 12px; box-shadow: var(--shadow);
@@ -270,6 +274,8 @@
    Audio goes in: audio/<id>/<number>.mp3  (e.g. audio/fatiha/1.mp3) */
 const SURAHS = [
   { id: "insan", en: "Al-Insan", ar: "الإنسان", meaning: "Man", num: "76", color: "#7c9cff", basmala: true, unit: "Ayah",
+    /* learned in parts: the next part opens once every ayah in this one is starred */
+    stages: [[0, 11], [12, 23], [24, 30]],
     ayahs: [
       "هَلْ أَتَىٰ عَلَى الْإِنْسَانِ حِينٌ مِنَ الدَّهْرِ لَمْ يَكُنْ شَيْئًا مَذْكُورًا",
       "إِنَّا خَلَقْنَا الْإِنْسَانَ مِنْ نُطْفَةٍ أَمْشَاجٍ نَبْتَلِيهِ فَجَعَلْنَاهُ سَمِيعًا بَصِيرًا",
@@ -447,11 +453,32 @@ document.getElementById("grid").addEventListener("click", e => {
 });
 
 /* ---------- reader ---------- */
-let surah = null;
+let surah = null, stage = 0;
+const stageRange = (k = stage) => surah.stages ? surah.stages[k] : [0, surah.ayahs.length - 1];
+const inStage = i => i >= stageRange()[0] && i <= stageRange()[1];
+function stageDone(k, list = new Set(progress[surah.id] || [])) {
+  const [a, b] = stageRange(k);
+  for (let i = a; i <= b; i++) if (!list.has(i)) return false;
+  return true;
+}
+/* open the first part that isn't finished yet */
+function firstOpenStage() {
+  if (!surah.stages) return 0;
+  const k = surah.stages.findIndex((_, k) => !stageDone(k));
+  return k < 0 ? 0 : k;
+}
+function stageTabs() {
+  if (!surah.stages) return "";
+  return '<div class="stages">' + surah.stages.map(([a, b], k) => {
+    const open = k === 0 || stageDone(k - 1);
+    return `<button class="stage ${k === stage ? "on" : ""}" data-stage="${k}" ${open ? "" : "disabled"}>${open ? "" : "🔒 "}Ayahs ${a + 1}–${b + 1}</button>`;
+  }).join("") + "</div>";
+}
 const ayahBox = document.getElementById("ayahs");
 
 function openSurah(id) {
   surah = SURAHS.find(s => s.id === id);
+  stage = firstOpenStage();
   stopAudio();
   document.getElementById("rTitle").textContent = surah.en;
   document.getElementById("rTitleAr").textContent = surah.ar;
@@ -478,7 +505,8 @@ document.getElementById("paletteBtn").onclick = () => document.getElementById("r
 
 function renderAyahs() {
   const learned = progress[surah.id] || [];
-  ayahBox.innerHTML = surah.ayahs.map((t, i) => `
+  document.getElementById("basmala").classList.toggle("hidden", !surah.basmala || stageRange()[0] > 0);
+  ayahBox.innerHTML = stageTabs() + surah.ayahs.map((t, i) => !inStage(i) ? "" : `
     <article class="ayah ${learned.includes(i) ? "learned" : ""}" data-i="${i}">
       <div class="num">${label(i)}</div>
       <div class="text ar-only">${t}</div>
@@ -492,6 +520,8 @@ function renderAyahs() {
 }
 
 ayahBox.addEventListener("click", e => {
+  const st = e.target.closest("[data-stage]");
+  if (st) { stopAudio(); stage = +st.dataset.stage; return renderAyahs(); }
   const p = e.target.closest("[data-play]");
   const s = e.target.closest("[data-star]");
   const t = e.target.closest(".text, .tr");
@@ -519,6 +549,12 @@ function toggleLearned(i) {
   row.querySelector(".star").classList.toggle("on", list.has(i));
   if (list.has(i)) {
     if (list.size === surah.ayahs.length) { celebrate(30); toast(`🏆 MashaAllah! You learned all of ${surah.en}!`); }
+    else if (surah.stages && stage < surah.stages.length - 1 && stageDone(stage, list)) {
+      celebrate(20);
+      toast(`🎉 MashaAllah! Now on to ayahs ${surah.stages[stage + 1][0] + 1}–${surah.stages[stage + 1][1] + 1}!`);
+      const next = stage + 1;
+      setTimeout(() => { stopAudio(); stage = next; renderAyahs(); window.scrollTo({ top: 0, behavior: "smooth" }); }, 1800);
+    }
     else { celebrate(8); toast("⭐ Great job!"); }
   }
 }
@@ -593,7 +629,7 @@ function partEnded() {
   if (current === -2) return playingAll ? setTimeout(() => playAyah(0, true), 500) : stopAudio();
   timesLeft--;
   if (timesLeft > 0) return setTimeout(startCurrent, 600);
-  if (playingAll && current < surah.ayahs.length - 1) {
+  if (playingAll && current < stageRange()[1]) {
     const next = current + 1;
     return setTimeout(() => playAyah(next, true), 700);
   }
@@ -604,7 +640,7 @@ audio.addEventListener("error", () => {
   toast(`🎧 Recording for ${surah.unit.toLowerCase()} ${label(current)} is coming soon!`);
   stopAudio();
 });
-document.getElementById("playAll").onclick = () => playingAll ? stopAudio() : surah.basmala ? playBasmala(true) : playAyah(0, true);
+document.getElementById("playAll").onclick = () => playingAll ? stopAudio() : surah.basmala && stageRange()[0] === 0 ? playBasmala(true) : playAyah(stageRange()[0], true);
 
 /* Bismillah before each surah, using the recitation from Al-Fatiha */
 const basmalaEl = document.getElementById("basmala");
