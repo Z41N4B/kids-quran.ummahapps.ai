@@ -1,0 +1,17 @@
+# Kids Qur'an
+
+> Kids Qur'an is a free, browser-based app that helps children memorise parts of the Qur'an, made by Ummah Apps. URL: https://kids-quran.ummahapps.ai/
+
+## What it does
+
+- Surahs: Al-Fatiha, Ayatul Kursi, Al-Asr, Al-Kafirun, Al-Ikhlas, Al-Falaq, An-Nas, Al-Kawthar and Al-Insan. Al-Insan is learned in three parts that unlock in turn.
+- Recitation by Sheikh Saad al-Ghamdi.
+- Repeat each part 1, 3, 5 or 10 times, or play everything in order.
+- Play slowly, hide the words to test yourself, and show the English translation.
+- Colour themes children can choose.
+- Free, with no sign-up.
+
+## Links
+
+- App: https://kids-quran.ummahapps.ai/
+- Publisher: https://ummahapps.ai/
