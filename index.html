@@ -193,6 +193,21 @@
   .swatch[data-t="night"] { background: linear-gradient(180deg, #1f2357 0%, #6b4fbf 100%); }
 
   /* ---------- home ---------- */
+const inRange = (a, b) => s => /^\d+$/.test(s.num) && +s.num >= a && +s.num <= b;
+const HOME_TABS = [
+  { label: "Key surahs", test: s => !/^\d+$/.test(s.num) || +s.num < 50 },
+  { label: "Surahs 50–66", test: inRange(50, 66) },
+  { label: "Surahs 67–77", test: inRange(67, 77) },
+  { label: "Surahs 78–92", test: inRange(78, 92) },
+  { label: "Surahs 93–102", test: inRange(93, 102) },
+  { label: "Surahs 103–114", test: inRange(103, 114) },
+];
+let homeTab = Math.min(store.get("homeTab", 0), HOME_TABS.length - 1);
+function setHomeTab(k) { homeTab = k; store.set("homeTab", k); }
+document.getElementById("homeTabs").addEventListener("click", e => {
+  const b = e.target.closest("[data-tab]");
+  if (b) { setHomeTab(+b.dataset.tab); renderHome(); }
+});
   .hero { text-align: center; margin: 12px 0 20px; }
   .hero h1 {
     font-size: clamp(2.2rem, 7vw, 3.4rem); margin: 6px 0 2px; color: #fff;
@@ -340,6 +355,7 @@
     <div class="themes" data-themes></div>
     <p class="credit">Recitation by Sheikh Saad al-Ghamdi</p>
   </section>
+  <div class="stages" id="homeTabs"></div>
   <section class="grid" id="grid"></section>
   <footer class="about">
     <h2>About Kids Qur’an (for grown-ups)</h2>
@@ -595,6 +611,13 @@ const SURAHS = [
 const ORDER = ["fatiha", "baqarahstart", "kursi", "baqarah", "imran", "kahf", "sajdah", "yasin", "rahman", "waqiah", "mulk", "qalam", "haqqah", "maarij", "nuh", "jinn", "muzzammil", "muddaththir", "qiyamah", "insan", "mursalat", "naba", "naziat", "abasa", "takwir", "infitar", "mutaffifin", "inshiqaq", "buruj", "tariq", "ala", "ghashiyah", "fajr", "balad", "shams", "layl", "duha", "sharh", "tin", "alaq", "qadr", "bayyinah", "zalzalah", "adiyat", "qariah", "takathur", "asr", "humazah", "fil", "quraysh", "maun", "kawthar", "kafirun", "nasr", "masad", "ikhlas", "falaq", "nas"];
 SURAHS.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
 
+/* surahs over 20 ayahs are learned in parts of about 12 ayahs */
+SURAHS.forEach(s => {
+  if (s.stages || s.clips || s.ayahs.length <= 20) return;
+  const parts = Math.round(s.ayahs.length / 12);
+  s.stages = Array.from({ length: parts }, (_, k) => [Math.round(k * s.ayahs.length / parts), Math.round((k + 1) * s.ayahs.length / parts) - 1]);
+});
+
 /* Saheeh International translation */
 const TR = {
   baqarahstart: ["Alif, Lam, Meem.","This is the Book about which there is no doubt, a guidance for those conscious of Allah -","Who believe in the unseen, establish prayer, and spend out of what We have provided for them,","And who believe in what has been revealed to you, [O Muhammad], and what was revealed before you, and of the Hereafter they are certain [in faith].","Those are upon [right] guidance from their Lord, and it is those who are the successful."],
@@ -690,12 +713,29 @@ const saved = store.get("theme", "rainbow");
 setTheme(ALL_THEMES.includes(saved) ? saved : "rainbow");
 
 /* ---------- home ---------- */
+const inRange = (a, b) => s => /^\d+$/.test(s.num) && +s.num >= a && +s.num <= b;
+const HOME_TABS = [
+  { label: "Key surahs", test: s => !/^\d+$/.test(s.num) || +s.num < 50 },
+  { label: "Surahs 50–66", test: inRange(50, 66) },
+  { label: "Surahs 67–77", test: inRange(67, 77) },
+  { label: "Surahs 78–92", test: inRange(78, 92) },
+  { label: "Surahs 93–102", test: inRange(93, 102) },
+  { label: "Surahs 103–114", test: inRange(103, 114) },
+];
+let homeTab = Math.min(store.get("homeTab", 0), HOME_TABS.length - 1);
+function setHomeTab(k) { homeTab = k; store.set("homeTab", k); }
+document.getElementById("homeTabs").addEventListener("click", e => {
+  const b = e.target.closest("[data-tab]");
+  if (b) { setHomeTab(+b.dataset.tab); renderHome(); }
+});
 function learnedCount(id) {
   const s = SURAHS.find(x => x.id === id), l = (progress[id] || []).filter(i => i < s.ayahs.length);
   return id === "kursi" && l.includes(0) ? l.length + 1 : l.length;
 }
 function renderHome() {
-  document.getElementById("grid").innerHTML = SURAHS.map(s => {
+  document.getElementById("homeTabs").innerHTML = HOME_TABS.map((t, k) =>
+    `<button class="stage ${k === homeTab ? "on" : ""}" data-tab="${k}">${t.label}</button>`).join("");
+  document.getElementById("grid").innerHTML = SURAHS.filter(HOME_TABS[homeTab].test).map(s => {
     const n = learnedCount(s.id), total = shownTotal(s), pct = Math.round(n / total * 100);
     return `<button class="card" data-open="${s.id}">
       <div class="blob" style="background:${s.color}"></div>
@@ -739,6 +779,7 @@ const ayahBox = document.getElementById("ayahs");
 function openSurah(id) {
   surah = SURAHS.find(s => s.id === id);
   stage = firstOpenStage();
+  setHomeTab(HOME_TABS.findIndex(t => t.test(surah)));
   stopAudio();
   document.getElementById("rTitle").textContent = surah.en;
   document.getElementById("rTitleAr").textContent = surah.ar;
