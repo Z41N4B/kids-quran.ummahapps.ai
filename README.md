@@ -2,7 +2,7 @@
 
 A colorful app to help children memorize short surahs of the Quran.
 
-**Surahs:** Al-Fatiha, the start and end of Al-Baqarah, Ayatul Kursi (in 10 sections), the end of Ali 'Imran, Al-Kahf, As-Sajdah, Ya-Sin, Ar-Rahman, Al-Waqi'ah, and every surah from Al-Mulk (67) to An-Nas (114).
+**Surahs:** Al-Fatiha, the start and end of Al-Baqarah, Ayatul Kursi (in 10 sections), the end of Ali 'Imran, Al-Kahf, As-Sajdah, Ya-Sin, and every surah from Qaf (50) to An-Nas (114).
 
 ## Features
 - Tap any ayah to hear it, or **Play all** to go through the whole surah
