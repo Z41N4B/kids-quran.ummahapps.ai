@@ -195,7 +195,7 @@
   /* ---------- home ---------- */
 const inRange = (a, b) => s => /^\d+$/.test(s.num) && +s.num >= a && +s.num <= b;
 const HOME_TABS = [
-  { label: "Key surahs", test: s => !/^\d+$/.test(s.num) || +s.num < 50 },
+  { label: "Selected surahs", test: s => !/^\d+$/.test(s.num) || +s.num < 50 },
   { label: "Surahs 50–66", test: inRange(50, 66) },
   { label: "Surahs 67–77", test: inRange(67, 77) },
   { label: "Surahs 78–92", test: inRange(78, 92) },
@@ -288,6 +288,37 @@ document.getElementById("homeTabs").addEventListener("click", e => {
   .stage { background: #fff; color: var(--ink); padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 1rem; box-shadow: var(--shadow); }
   .stage.on { background: var(--accent); color: #fff; }
   .stage:disabled { opacity: .6; cursor: not-allowed; }
+  .about { font-size: .85rem; line-height: 1.45; background: rgba(255,255,255,.8); color: var(--ink); border-radius: 14px; padding: 8px 14px; margin: 0 0 14px; }
+  .who-wrap { position: relative; display: flex; justify-content: center; margin: 0 0 12px; }
+  .who { background: #fff; color: var(--ink); font-weight: 600; font-size: 1rem; padding: 8px 18px; border-radius: 999px; box-shadow: var(--shadow); }
+  .who-panel { position: absolute; top: calc(100% + 8px); z-index: 20; background: #fff; color: var(--ink); border-radius: 18px; box-shadow: var(--shadow); padding: 10px; width: min(300px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 6px; text-align: left; }
+  .who-row { display: flex; gap: 6px; }
+  .who-pick { flex: 1; text-align: left; background: #f3effa; color: var(--ink); padding: 10px 12px; border-radius: 12px; font-weight: 600; font-size: 1rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .who-pick.on { background: var(--accent); color: #fff; }
+  .who-x { background: #f3effa; color: var(--ink); border-radius: 12px; padding: 0 12px; font-size: .9rem; font-weight: 600; }
+  .who-add { display: flex; gap: 6px; margin-top: 4px; }
+  .who-add input { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 12px; border: 2px solid #e6def5; font: inherit; font-size: 1rem; color: var(--ink); }
+  .who-add button { background: var(--accent); color: #fff; border-radius: 12px; padding: 0 14px; font-weight: 600; font-size: 1rem; }
+  .hw { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; width: 100%; background: linear-gradient(90deg, #fff7d6, #fff); border: 3px solid #ffd25e; border-radius: 20px; padding: 12px 16px; margin: 0 0 12px; text-align: left; color: var(--ink); box-shadow: var(--shadow); }
+  .hw-tag { font-weight: 700; color: #a06d00; font-size: .9rem; }
+  .hw-title { font-weight: 700; font-size: 1.1rem; flex: 1; }
+  .hw-note { width: 100%; order: 3; font-size: .9rem; color: var(--ink-soft); }
+  .hw-count { font-weight: 600; }
+  .shelf { text-align: center; font-size: 1.6rem; letter-spacing: 2px; margin: 0 0 12px; }
+  .hw-set { display: block; margin: 0 auto 14px; background: rgba(255,255,255,.65); color: var(--ink); font-size: .85rem; padding: 6px 14px; border-radius: 999px; }
+  .modal { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 16px; background: rgba(20,10,40,.45); }
+  .modal-card { background: #fff; color: var(--ink); border-radius: 24px; padding: 20px; width: min(420px, 100%); max-height: calc(100vh - 32px); overflow: auto; box-shadow: var(--shadow); text-align: center; }
+  .modal-card h2 { margin: 4px 0 8px; }
+  .modal-card h3 { margin: 16px 0 6px; font-size: 1rem; text-align: left; }
+  .hw-form { display: flex; flex-direction: column; gap: 10px; text-align: left; }
+  .hw-form label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: .95rem; }
+  .hw-form select, .hw-form input { padding: 10px 12px; border-radius: 12px; border: 2px solid #e6def5; font: inherit; font-size: 1rem; color: var(--ink); background: #fff; }
+  .hw-form .big-btn { justify-content: center; }
+  .small-note { font-size: .8rem; color: var(--ink-soft); margin: 0; }
+  .link { background: none; color: var(--ink-soft); text-decoration: underline; margin-top: 12px; font-size: .95rem; }
+  .trophy { font-size: 5rem; line-height: 1.1; animation: pop .8s ease-out; }
+  @keyframes pop { 0% { transform: scale(0) rotate(-30deg); } 70% { transform: scale(1.25) rotate(8deg); } 100% { transform: scale(1); } }
+  .shelf-big { font-size: 1.8rem; letter-spacing: 2px; margin: 6px 0; }
   .ayahs { display: flex; flex-direction: column; gap: 14px; }
   .ayah {
     background: #fff; border-radius: 26px; padding: 14px 14px 12px; box-shadow: var(--shadow);
@@ -319,11 +350,11 @@ document.getElementById("homeTabs").addEventListener("click", e => {
   .toast {
     position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 120px);
     background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 999px; font-size: 1.05rem;
-    box-shadow: var(--shadow); transition: transform .3s; z-index: 50; max-width: calc(100% - 32px); text-align: center;
+    box-shadow: var(--shadow); transition: transform .3s; z-index: 90; max-width: calc(100% - 32px); text-align: center;
   }
   .toast.show { transform: translate(-50%, 0); }
 
-  .confetti { position: fixed; top: -40px; font-size: 2rem; z-index: 60; pointer-events: none; animation: fall linear forwards; }
+  .confetti { position: fixed; top: -40px; font-size: 2rem; z-index: 80; pointer-events: none; animation: fall linear forwards; }
   @keyframes fall { to { transform: translateY(110vh) rotate(540deg); } }
 
   .hidden { display: none !important; }
@@ -352,9 +383,14 @@ document.getElementById("homeTabs").addEventListener("click", e => {
   <section class="hero">
     <h1><span class="kid-only">⭐ </span>Learning Surahs<span class="kid-only"> ⭐</span></h1>
     <p><span class="kid-only">Pick a surah and let's learn it together!</span><span class="adult-only">Choose a surah to memorize</span></p>
+    <div class="who-wrap">
+      <button class="who" id="whoBtn" aria-haspopup="true"></button>
+      <div class="who-panel hidden" id="whoPanel"></div>
+    </div>
     <div class="themes" data-themes></div>
     <p class="credit">Recitation by Sheikh Saad al-Ghamdi</p>
   </section>
+  <section id="hwBox"></section>
   <div class="stages" id="homeTabs"></div>
   <section class="grid" id="grid"></section>
   <footer class="about">
@@ -376,6 +412,7 @@ document.getElementById("homeTabs").addEventListener("click", e => {
     <button class="palette-btn" id="paletteBtn" aria-label="Change colors">🎨</button>
   </div>
   <div class="themes reader-themes" data-themes id="readerThemes"></div>
+  <p class="about hidden" id="about"></p>
 
   <div class="controls">
     <button class="big-btn" id="playAll">▶ Play all</button>
@@ -396,12 +433,15 @@ document.getElementById("homeTabs").addEventListener("click", e => {
   <p class="credit" style="margin-top:16px">Recitation by Sheikh Saad al-Ghamdi</p>
 </main>
 
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true"><div class="modal-card" id="modalCard"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
 /* ---------- Surah data ----------
    Audio goes in: audio/<id>/<number>.mp3  (e.g. audio/fatiha/1.mp3) */
 const SURAHS = [
+  { id: "kursi2", en: "After Ayatul Kursi", ar: "البقرة ٢٥٦–٢٥٧", meaning: "The next two ayahs", num: "2:256", color: "#c76bff", basmala: false, unit: "Ayah", start: 256,
+    ayahs: ["لَا إِكْرَاهَ فِي الدِّينِ ۖ قَدْ تَبَيَّنَ الرُّشْدُ مِنَ الْغَيِّ ۚ فَمَنْ يَكْفُرْ بِالطَّاغُوتِ وَيُؤْمِنْ بِاللَّهِ فَقَدِ اسْتَمْسَكَ بِالْعُرْوَةِ الْوُثْقَىٰ لَا انْفِصَامَ لَهَا ۗ وَاللَّهُ سَمِيعٌ عَلِيمٌ","اللَّهُ وَلِيُّ الَّذِينَ آمَنُوا يُخْرِجُهُمْ مِنَ الظُّلُمَاتِ إِلَى النُّورِ ۖ وَالَّذِينَ كَفَرُوا أَوْلِيَاؤُهُمُ الطَّاغُوتُ يُخْرِجُونَهُمْ مِنَ النُّورِ إِلَى الظُّلُمَاتِ ۗ أُولَٰئِكَ أَصْحَابُ النَّارِ ۖ هُمْ فِيهَا خَالِدُونَ"] },
   { id: "qaf", en: "Qaf", ar: "ق", meaning: "Qaf", num: "50", color: "#ff7eb6", basmala: true, unit: "Ayah",
     ayahs: ["ق ۚ وَالْقُرْآنِ الْمَجِيدِ","بَلْ عَجِبُوا أَنْ جَاءَهُمْ مُنْذِرٌ مِنْهُمْ فَقَالَ الْكَافِرُونَ هَٰذَا شَيْءٌ عَجِيبٌ","أَإِذَا مِتْنَا وَكُنَّا تُرَابًا ۖ ذَٰلِكَ رَجْعٌ بَعِيدٌ","قَدْ عَلِمْنَا مَا تَنْقُصُ الْأَرْضُ مِنْهُمْ ۖ وَعِنْدَنَا كِتَابٌ حَفِيظٌ","بَلْ كَذَّبُوا بِالْحَقِّ لَمَّا جَاءَهُمْ فَهُمْ فِي أَمْرٍ مَرِيجٍ","أَفَلَمْ يَنْظُرُوا إِلَى السَّمَاءِ فَوْقَهُمْ كَيْفَ بَنَيْنَاهَا وَزَيَّنَّاهَا وَمَا لَهَا مِنْ فُرُوجٍ","وَالْأَرْضَ مَدَدْنَاهَا وَأَلْقَيْنَا فِيهَا رَوَاسِيَ وَأَنْبَتْنَا فِيهَا مِنْ كُلِّ زَوْجٍ بَهِيجٍ","تَبْصِرَةً وَذِكْرَىٰ لِكُلِّ عَبْدٍ مُنِيبٍ","وَنَزَّلْنَا مِنَ السَّمَاءِ مَاءً مُبَارَكًا فَأَنْبَتْنَا بِهِ جَنَّاتٍ وَحَبَّ الْحَصِيدِ","وَالنَّخْلَ بَاسِقَاتٍ لَهَا طَلْعٌ نَضِيدٌ","رِزْقًا لِلْعِبَادِ ۖ وَأَحْيَيْنَا بِهِ بَلْدَةً مَيْتًا ۚ كَذَٰلِكَ الْخُرُوجُ","كَذَّبَتْ قَبْلَهُمْ قَوْمُ نُوحٍ وَأَصْحَابُ الرَّسِّ وَثَمُودُ","وَعَادٌ وَفِرْعَوْنُ وَإِخْوَانُ لُوطٍ","وَأَصْحَابُ الْأَيْكَةِ وَقَوْمُ تُبَّعٍ ۚ كُلٌّ كَذَّبَ الرُّسُلَ فَحَقَّ وَعِيدِ","أَفَعَيِينَا بِالْخَلْقِ الْأَوَّلِ ۚ بَلْ هُمْ فِي لَبْسٍ مِنْ خَلْقٍ جَدِيدٍ","وَلَقَدْ خَلَقْنَا الْإِنْسَانَ وَنَعْلَمُ مَا تُوَسْوِسُ بِهِ نَفْسُهُ ۖ وَنَحْنُ أَقْرَبُ إِلَيْهِ مِنْ حَبْلِ الْوَرِيدِ","إِذْ يَتَلَقَّى الْمُتَلَقِّيَانِ عَنِ الْيَمِينِ وَعَنِ الشِّمَالِ قَعِيدٌ","مَا يَلْفِظُ مِنْ قَوْلٍ إِلَّا لَدَيْهِ رَقِيبٌ عَتِيدٌ","وَجَاءَتْ سَكْرَةُ الْمَوْتِ بِالْحَقِّ ۖ ذَٰلِكَ مَا كُنْتَ مِنْهُ تَحِيدُ","وَنُفِخَ فِي الصُّورِ ۚ ذَٰلِكَ يَوْمُ الْوَعِيدِ","وَجَاءَتْ كُلُّ نَفْسٍ مَعَهَا سَائِقٌ وَشَهِيدٌ","لَقَدْ كُنْتَ فِي غَفْلَةٍ مِنْ هَٰذَا فَكَشَفْنَا عَنْكَ غِطَاءَكَ فَبَصَرُكَ الْيَوْمَ حَدِيدٌ","وَقَالَ قَرِينُهُ هَٰذَا مَا لَدَيَّ عَتِيدٌ","أَلْقِيَا فِي جَهَنَّمَ كُلَّ كَفَّارٍ عَنِيدٍ","مَنَّاعٍ لِلْخَيْرِ مُعْتَدٍ مُرِيبٍ","الَّذِي جَعَلَ مَعَ اللَّهِ إِلَٰهًا آخَرَ فَأَلْقِيَاهُ فِي الْعَذَابِ الشَّدِيدِ","۞ قَالَ قَرِينُهُ رَبَّنَا مَا أَطْغَيْتُهُ وَلَٰكِنْ كَانَ فِي ضَلَالٍ بَعِيدٍ","قَالَ لَا تَخْتَصِمُوا لَدَيَّ وَقَدْ قَدَّمْتُ إِلَيْكُمْ بِالْوَعِيدِ","مَا يُبَدَّلُ الْقَوْلُ لَدَيَّ وَمَا أَنَا بِظَلَّامٍ لِلْعَبِيدِ","يَوْمَ نَقُولُ لِجَهَنَّمَ هَلِ امْتَلَأْتِ وَتَقُولُ هَلْ مِنْ مَزِيدٍ","وَأُزْلِفَتِ الْجَنَّةُ لِلْمُتَّقِينَ غَيْرَ بَعِيدٍ","هَٰذَا مَا تُوعَدُونَ لِكُلِّ أَوَّابٍ حَفِيظٍ","مَنْ خَشِيَ الرَّحْمَٰنَ بِالْغَيْبِ وَجَاءَ بِقَلْبٍ مُنِيبٍ","ادْخُلُوهَا بِسَلَامٍ ۖ ذَٰلِكَ يَوْمُ الْخُلُودِ","لَهُمْ مَا يَشَاءُونَ فِيهَا وَلَدَيْنَا مَزِيدٌ","وَكَمْ أَهْلَكْنَا قَبْلَهُمْ مِنْ قَرْنٍ هُمْ أَشَدُّ مِنْهُمْ بَطْشًا فَنَقَّبُوا فِي الْبِلَادِ هَلْ مِنْ مَحِيصٍ","إِنَّ فِي ذَٰلِكَ لَذِكْرَىٰ لِمَنْ كَانَ لَهُ قَلْبٌ أَوْ أَلْقَى السَّمْعَ وَهُوَ شَهِيدٌ","وَلَقَدْ خَلَقْنَا السَّمَاوَاتِ وَالْأَرْضَ وَمَا بَيْنَهُمَا فِي سِتَّةِ أَيَّامٍ وَمَا مَسَّنَا مِنْ لُغُوبٍ","فَاصْبِرْ عَلَىٰ مَا يَقُولُونَ وَسَبِّحْ بِحَمْدِ رَبِّكَ قَبْلَ طُلُوعِ الشَّمْسِ وَقَبْلَ الْغُرُوبِ","وَمِنَ اللَّيْلِ فَسَبِّحْهُ وَأَدْبَارَ السُّجُودِ","وَاسْتَمِعْ يَوْمَ يُنَادِ الْمُنَادِ مِنْ مَكَانٍ قَرِيبٍ","يَوْمَ يَسْمَعُونَ الصَّيْحَةَ بِالْحَقِّ ۚ ذَٰلِكَ يَوْمُ الْخُرُوجِ","إِنَّا نَحْنُ نُحْيِي وَنُمِيتُ وَإِلَيْنَا الْمَصِيرُ","يَوْمَ تَشَقَّقُ الْأَرْضُ عَنْهُمْ سِرَاعًا ۚ ذَٰلِكَ حَشْرٌ عَلَيْنَا يَسِيرٌ","نَحْنُ أَعْلَمُ بِمَا يَقُولُونَ ۖ وَمَا أَنْتَ عَلَيْهِمْ بِجَبَّارٍ ۖ فَذَكِّرْ بِالْقُرْآنِ مَنْ يَخَافُ وَعِيدِ"] },
   { id: "dhariyat", en: "Adh-Dhariyat", ar: "الذاريات", meaning: "The Winnowing Winds", num: "51", color: "#8b7bff", basmala: true, unit: "Ayah",
@@ -637,8 +677,19 @@ const SURAHS = [
     clips: { file: "audio/kursi/full.mp3", times: [0.2, 7.93, 14.09, 18.26, 25.11, 30.11, 39.08, 43.38, 46.41, null] } }
 ];
 
+/* why these surahs matter: authentic hadith only */
+const ABOUT = {
+  fatiha: "The Prophet ﷺ called Al-Fatiha the greatest surah in the Qur'an, the seven oft-repeated ayahs (Sahih al-Bukhari 4474).",
+  baqarahstart: "The Prophet ﷺ said Shaytan flees from a house in which Surah Al-Baqarah is recited (Sahih Muslim 780).",
+  kursi: "The greatest ayah in the Qur'an (Sahih Muslim 810). Whoever recites it before sleeping has a protector from Allah, and Shaytan will not come near until morning (Sahih al-Bukhari 2311).",
+  baqarah: "Whoever recites the last two ayahs of Al-Baqarah at night, they will be enough for him (Sahih al-Bukhari 5009, Sahih Muslim 807).",
+  imran: "The Prophet ﷺ recited the last ten ayahs of Ali 'Imran when he woke up at night (Sahih al-Bukhari 183).",
+  kahf: "Whoever memorises the first ten ayahs of Surah Al-Kahf will be protected from the Dajjal (Sahih Muslim 809).",
+  sajdah: "The Prophet ﷺ recited As-Sajdah in the Fajr prayer on Fridays (Sahih al-Bukhari 891), and would not sleep until he had recited it and Al-Mulk (Jami' at-Tirmidhi 2892, graded sahih by al-Albani).",
+};
+
 /* Mushaf order */
-const ORDER = ["fatiha", "baqarahstart", "kursi", "baqarah", "imran", "kahf", "sajdah", "yasin", "qaf", "dhariyat", "tur", "najm", "qamar", "rahman", "waqiah", "hadid", "mujadilah", "hashr", "mumtahanah", "saff", "jumuah", "munafiqun", "taghabun", "talaq", "tahrim", "mulk", "qalam", "haqqah", "maarij", "nuh", "jinn", "muzzammil", "muddaththir", "qiyamah", "insan", "mursalat", "naba", "naziat", "abasa", "takwir", "infitar", "mutaffifin", "inshiqaq", "buruj", "tariq", "ala", "ghashiyah", "fajr", "balad", "shams", "layl", "duha", "sharh", "tin", "alaq", "qadr", "bayyinah", "zalzalah", "adiyat", "qariah", "takathur", "asr", "humazah", "fil", "quraysh", "maun", "kawthar", "kafirun", "nasr", "masad", "ikhlas", "falaq", "nas"];
+const ORDER = ["fatiha", "baqarahstart", "kursi", "kursi2", "baqarah", "imran", "kahf", "sajdah", "yasin", "qaf", "dhariyat", "tur", "najm", "qamar", "rahman", "waqiah", "hadid", "mujadilah", "hashr", "mumtahanah", "saff", "jumuah", "munafiqun", "taghabun", "talaq", "tahrim", "mulk", "qalam", "haqqah", "maarij", "nuh", "jinn", "muzzammil", "muddaththir", "qiyamah", "insan", "mursalat", "naba", "naziat", "abasa", "takwir", "infitar", "mutaffifin", "inshiqaq", "buruj", "tariq", "ala", "ghashiyah", "fajr", "balad", "shams", "layl", "duha", "sharh", "tin", "alaq", "qadr", "bayyinah", "zalzalah", "adiyat", "qariah", "takathur", "asr", "humazah", "fil", "quraysh", "maun", "kawthar", "kafirun", "nasr", "masad", "ikhlas", "falaq", "nas"];
 SURAHS.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
 
 /* surahs over 20 ayahs are learned in parts of about 12 ayahs */
@@ -650,6 +701,7 @@ SURAHS.forEach(s => {
 
 /* Saheeh International translation */
 const TR = {
+  kursi2: ["There shall be no compulsion in [acceptance of] the religion. The right course has become clear from the wrong. So whoever disbelieves in Taghut and believes in Allah has grasped the most trustworthy handhold with no break in it. And Allah is Hearing and Knowing.","Allah is the ally of those who believe. He brings them out from darknesses into the light. And those who disbelieve - their allies are Taghut. They take them out of the light into darknesses. Those are the companions of the Fire; they will abide eternally therein."],
   qaf: ["Qaf. By the honored Qur'an...","But they wonder that there has come to them a warner from among themselves, and the disbelievers say, \"This is an amazing thing.","When we have died and have become dust, [we will return to life]? That is a distant return.\"","We know what the earth diminishes of them, and with Us is a retaining record.","But they denied the truth when it came to them, so they are in a confused condition.","Have they not looked at the heaven above them - how We structured it and adorned it and [how] it has no rifts?","And the earth - We spread it out and cast therein firmly set mountains and made grow therein [something] of every beautiful kind,","Giving insight and a reminder for every servant who turns [to Allah].","And We have sent down blessed rain from the sky and made grow thereby gardens and grain from the harvest","And lofty palm trees having fruit arranged in layers -","As provision for the servants, and We have given life thereby to a dead land. Thus is the resurrection.","The people of Noah denied before them, and the companions of the well and Thamud","And 'Aad and Pharaoh and the brothers of Lot","And the companions of the thicket and the people of Tubba'. All denied the messengers, so My threat was justly fulfilled.","Did We fail in the first creation? But they are in confusion over a new creation.","And We have already created man and know what his soul whispers to him, and We are closer to him than [his] jugular vein","When the two receivers receive, seated on the right and on the left.","Man does not utter any word except that with him is an observer prepared [to record].","And the intoxication of death will bring the truth; that is what you were trying to avoid.","And the Horn will be blown. That is the Day of [carrying out] the threat.","And every soul will come, with it a driver and a witness.","[It will be said], \"You were certainly in unmindfulness of this, and We have removed from you your cover, so your sight, this Day, is sharp.\"","And his companion, [the angel], will say, \"This [record] is what is with me, prepared.\"","[Allah will say], \"Throw into Hell every obstinate disbeliever,","Preventer of good, aggressor, and doubter,","Who made [as equal] with Allah another deity; then throw him into the severe punishment.\"","His [devil] companion will say, \"Our Lord, I did not make him transgress, but he [himself] was in extreme error.\"","[Allah] will say, \"Do not dispute before Me, while I had already presented to you the warning.","The word will not be changed with Me, and never will I be unjust to the servants.\"","On the Day We will say to Hell, \"Have you been filled?\" and it will say, \"Are there some more,\"","And Paradise will be brought near to the righteous, not far,","[It will be said], \"This is what you were promised - for every returner [to Allah] and keeper [of His covenant]","Who feared the Most Merciful unseen and came with a heart returning [in repentance].","Enter it in peace. This is the Day of Eternity.\"","They will have whatever they wish therein, and with Us is more.","And how many a generation before them did We destroy who were greater than them in [striking] power and had explored throughout the lands. Is there any place of escape?","Indeed in that is a reminder for whoever has a heart or who listens while he is present [in mind].","And We did certainly create the heavens and earth and what is between them in six days, and there touched Us no weariness.","So be patient, [O Muhammad], over what they say and exalt [Allah] with praise of your Lord before the rising of the sun and before its setting,","And [in part] of the night exalt Him and after prostration.","And listen on the Day when the Caller will call out from a place that is near -","The Day they will hear the blast [of the Horn] in truth. That is the Day of Emergence [from the graves].","Indeed, it is We who give life and cause death, and to Us is the destination","On the Day the earth breaks away from them [and they emerge] rapidly; that is a gathering easy for Us.","We are most knowing of what they say, and you are not over them a tyrant. But remind by the Qur'an whoever fears My threat."],
   dhariyat: ["By those [winds] scattering [dust] dispersing","And those [clouds] carrying a load [of water]","And those [ships] sailing with ease","And those [angels] apportioning [each] matter,","Indeed, what you are promised is true.","And indeed, the recompense is to occur.","By the heaven containing pathways,","Indeed, you are in differing speech.","Deluded away from the Qur'an is he who is deluded.","Destroyed are the falsifiers","Who are within a flood [of confusion] and heedless.","They ask, \"When is the Day of Recompense?\"","[It is] the Day they will be tormented over the Fire","[And will be told], \"Taste your torment. This is that for which you were impatient.\"","Indeed, the righteous will be among gardens and springs,","Accepting what their Lord has given them. Indeed, they were before that doers of good.","They used to sleep but little of the night,","And in the hours before dawn they would ask forgiveness,","And from their properties was [given] the right of the [needy] petitioner and the deprived.","And on the earth are signs for the certain [in faith]","And in yourselves. Then will you not see?","And in the heaven is your provision and whatever you are promised.","Then by the Lord of the heaven and earth, indeed, it is truth - just as [sure as] it is that you are speaking.","Has there reached you the story of the honored guests of Abraham? -","When they entered upon him and said, \"[We greet you with] peace.\" He answered, \"[And upon you] peace, [you are] a people unknown.","Then he went to his family and came with a fat [roasted] calf","And placed it near them; he said, \"Will you not eat?\"","And he felt from them apprehension. They said, \"Fear not,\" and gave him good tidings of a learned boy.","And his wife approached with a cry [of alarm] and struck her face and said, \"[I am] a barren old woman!\"","They said, \"Thus has said your Lord; indeed, He is the Wise, the Knowing.\"","[Abraham] said, \"Then what is your business [here], O messengers?\"","They said, \"Indeed, we have been sent to a people of criminals","To send down upon them stones of clay,","Marked in the presence of your Lord for the transgressors.\"","So We brought out whoever was in the cities of the believers.","And We found not within them other than a [single] house of Muslims.","And We left therein a sign for those who fear the painful punishment.","And in Moses [was a sign], when We sent him to Pharaoh with clear authority.","But he turned away with his supporters and said,\" A magician or a madman.\"","So We took him and his soldiers and cast them into the sea, and he was blameworthy.","And in 'Aad [was a sign], when We sent against them the barren wind.","It left nothing of what it came upon but that it made it like disintegrated ruins.","And in Thamud, when it was said to them, \"Enjoy yourselves for a time.\"","But they were insolent toward the command of their Lord, so the thunderbolt seized them while they were looking on.","And they were unable to arise, nor could they defend themselves.","And [We destroyed] the people of Noah before; indeed, they were a people defiantly disobedient.","And the heaven We constructed with strength, and indeed, We are [its] expander.","And the earth We have spread out, and excellent is the preparer.","And of all things We created two mates; perhaps you will remember.","So flee to Allah. Indeed, I am to you from Him a clear warner.","And do not make [as equal] with Allah another deity. Indeed, I am to you from Him a clear warner.","Similarly, there came not to those before them any messenger except that they said, \"A magician or a madman.\"","Did they suggest it to them? Rather, they [themselves] are a transgressing people.","So leave them, [O Muhammad], for you are not to be blamed.","And remind, for indeed, the reminder benefits the believers.","And I did not create the jinn and mankind except to worship Me.","I do not want from them any provision, nor do I want them to feed Me.","Indeed, it is Allah who is the [continual] Provider, the firm possessor of strength.","And indeed, for those who have wronged is a portion [of punishment] like the portion of their predecessors, so let them not impatiently urge Me.","And woe to those who have disbelieved from their Day which they are promised."],
   tur: ["By the mount","And [by] a Book inscribed","In parchment spread open","And [by] the frequented House","And [by] the heaven raised high","And [by] the sea filled [with fire],","Indeed, the punishment of your Lord will occur.","Of it there is no preventer.","On the Day the heaven will sway with circular motion","And the mountains will pass on, departing -","Then woe, that Day, to the deniers,","Who are in [empty] discourse amusing themselves.","The Day they are thrust toward the fire of Hell with a [violent] thrust, [its angels will say],","\"This is the Fire which you used to deny.","Then is this magic, or do you not see?","[Enter to] burn therein; then be patient or impatient - it is all the same for you. You are only being recompensed [for] what you used to do.\"","Indeed, the righteous will be in gardens and pleasure,","Enjoying what their Lord has given them, and their Lord protected them from the punishment of Hellfire.","[They will be told], \"Eat and drink in satisfaction for what you used to do.\"","They will be reclining on thrones lined up, and We will marry them to fair women with large, [beautiful] eyes.","And those who believed and whose descendants followed them in faith - We will join with them their descendants, and We will not deprive them of anything of their deeds. Every person, for what he earned, is retained.","And We will provide them with fruit and meat from whatever they desire.","They will exchange with one another a cup [of wine] wherein [results] no ill speech or commission of sin.","There will circulate among them [servant] boys [especially] for them, as if they were pearls well-protected.","And they will approach one another, inquiring of each other.","They will say, \"Indeed, we were previously among our people fearful [of displeasing Allah].","So Allah conferred favor upon us and protected us from the punishment of the Scorching Fire.","Indeed, we used to supplicate Him before. Indeed, it is He who is the Beneficent, the Merciful.\"","So remind [O Muhammad], for you are not, by the favor of your Lord, a soothsayer or a madman.","Or do they say [of you], \"A poet for whom we await a misfortune of time?\"","Say, \"Wait, for indeed I am, with you, among the waiters.\"","Or do their minds command them to [say] this, or are they a transgressing people?","Or do they say, \"He has made it up\"? Rather, they do not believe.","Then let them produce a statement like it, if they should be truthful.","Or were they created by nothing, or were they the creators [of themselves]?","Or did they create the heavens and the earth? Rather, they are not certain.","Or have they the depositories [containing the provision] of your Lord? Or are they the controllers [of them]?","Or have they a stairway [into the heaven] upon which they listen? Then let their listener produce a clear authority.","Or has He daughters while you have sons?","Or do you, [O Muhammad], ask of them a payment, so they are by debt burdened down?","Or have they [knowledge of] the unseen, so they write [it] down?","Or do they intend a plan? But those who disbelieve - they are the object of a plan.","Or have they a deity other than Allah? Exalted is Allah above whatever they associate with Him.","And if they were to see a fragment from the sky falling, they would say, \"[It is merely] clouds heaped up.\"","So leave them until they meet their Day in which they will be struck insensible -","The Day their plan will not avail them at all, nor will they be helped.","And indeed, for those who have wronged is a punishment before that, but most of them do not know.","And be patient, [O Muhammad], for the decision of your Lord, for indeed, you are in Our eyes. And exalt [Allah] with praise of your Lord when you arise.","And in a part of the night exalt Him and after [the setting of] the stars."],
@@ -732,10 +784,20 @@ const THEMES = ["rainbow", "sky", "mint", "sunny"];
 const THEME_NAMES = { rainbow: "Pink to blue", sky: "Sky blue", mint: "Mint green", sunny: "Sunshine", peach: "Peach", lilac: "Lilac", night: "Night sky" };
 
 /* ---------- saved settings (safe if storage is blocked) ---------- */
-const store = {
+/* each person on this device has their own progress and settings */
+const raw = {
   get(k, d) { try { const v = localStorage.getItem("qs-" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem("qs-" + k, JSON.stringify(v)); } catch {} }
+  set(k, v) { try { localStorage.setItem("qs-" + k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem("qs-" + k); } catch {} }
 };
+const ICONS = ["🌙", "⭐", "🌸", "🦋", "🐢", "🦁", "🌈", "🍀"];
+let profiles = raw.get("profiles", null) || [{ id: "p0", name: "Me", icon: "🌙" }];
+let profileId = raw.get("profile", profiles[0].id);
+if (!profiles.some(p => p.id === profileId)) profileId = profiles[0].id;
+// the first person keeps the original keys, so progress saved before profiles existed isn't lost
+const pkey = (k, id = profileId) => id === "p0" ? k : id + ":" + k;
+const PERSON_KEYS = ["progress", "repeat", "theme", "slow", "en", "homeTab", "last", "homework"];
+const store = { get: (k, d) => raw.get(pkey(k), d), set: (k, v) => raw.set(pkey(k), v) };
 let progress = store.get("progress", {});
 let repeat = store.get("repeat", 3);
 
@@ -760,7 +822,7 @@ setTheme(ALL_THEMES.includes(saved) ? saved : "rainbow");
 /* ---------- home ---------- */
 const inRange = (a, b) => s => /^\d+$/.test(s.num) && +s.num >= a && +s.num <= b;
 const HOME_TABS = [
-  { label: "Key surahs", test: s => !/^\d+$/.test(s.num) || +s.num < 50 },
+  { label: "Selected surahs", test: s => !/^\d+$/.test(s.num) || +s.num < 50 },
   { label: "Surahs 50–66", test: inRange(50, 66) },
   { label: "Surahs 67–77", test: inRange(67, 77) },
   { label: "Surahs 78–92", test: inRange(78, 92) },
@@ -778,6 +840,7 @@ function learnedCount(id) {
   return id === "kursi" && l.includes(0) ? l.length + 1 : l.length;
 }
 function renderHome() {
+  renderHw();
   document.getElementById("homeTabs").innerHTML = HOME_TABS.map((t, k) =>
     `<button class="stage ${k === homeTab ? "on" : ""}" data-tab="${k}">${t.label}</button>`).join("");
   document.getElementById("grid").innerHTML = SURAHS.filter(HOME_TABS[homeTab].test).map(s => {
@@ -823,6 +886,9 @@ const ayahBox = document.getElementById("ayahs");
 
 function openSurah(id) {
   surah = SURAHS.find(s => s.id === id);
+  document.getElementById("about").textContent = ABOUT[id] || "";
+  document.getElementById("about").classList.toggle("hidden", !ABOUT[id]);
+  store.set("last", id);
   stage = firstOpenStage();
   setHomeTab(HOME_TABS.findIndex(t => t.test(surah)));
   stopAudio();
@@ -836,6 +902,7 @@ function openSurah(id) {
   history.pushState({ surah: id }, "", "#" + id);
 }
 function goHome() {
+  store.set("last", "");
   stopAudio();
   document.getElementById("reader").classList.add("hidden");
   document.getElementById("home").classList.remove("hidden");
@@ -893,6 +960,7 @@ function toggleLearned(i) {
   const row = ayahBox.querySelector(`[data-i="${i}"]`);
   row.classList.toggle("learned", list.has(i));
   row.querySelector(".star").classList.toggle("on", list.has(i));
+  if (list.has(i) && checkHomework()) return;
   if (list.has(i)) {
     if (list.size === surah.ayahs.length) { celebrate(30); toast(`🏆 MashaAllah! You learned all of ${surah.en}!`); }
     else if (surah.stages && stage < surah.stages.length - 1 && stageDone(stage, list)) {
@@ -1041,9 +1109,170 @@ function celebrate(n) {
   }
 }
 
+/* ---------- people ---------- */
+const whoBtn = document.getElementById("whoBtn"), whoPanel = document.getElementById("whoPanel");
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+let renaming = false;
+function renderWho() {
+  const me = profiles.find(p => p.id === profileId);
+  whoBtn.innerHTML = `${me.icon} ${esc(me.name)} ▾`;
+  whoPanel.innerHTML = profiles.map(p => `<div class="who-row">
+      <button class="who-pick ${p.id === profileId ? "on" : ""}" data-pick="${p.id}">${p.icon} ${esc(p.name)}</button>
+      ${p.id === profileId ? '<button class="who-x" data-rename>Rename</button>' : `<button class="who-x" data-del="${p.id}">Remove</button>`}
+    </div>`).join("") +
+    `<form class="who-add" id="whoForm"><input id="whoName" maxlength="20" placeholder="${renaming ? "New name" : "Add a person"}" aria-label="Name" value="${renaming ? esc(me.name) : ""}"><button>${renaming ? "Save" : "Add"}</button></form>`;
+}
+function switchTo(id) {
+  raw.set("profile", id);
+  location.href = location.pathname;
+}
+whoBtn.onclick = () => { renaming = false; renderWho(); whoPanel.classList.toggle("hidden"); };
+whoPanel.addEventListener("click", e => {
+  const pick = e.target.closest("[data-pick]"), del = e.target.closest("[data-del]");
+  if (pick && pick.dataset.pick !== profileId) switchTo(pick.dataset.pick);
+  if (e.target.closest("[data-rename]")) { renaming = true; renderWho(); document.getElementById("whoName").focus(); }
+  if (del) {
+    // tap twice to remove, so a child can't delete someone by accident
+    if (!del.dataset.armed) { del.dataset.armed = "1"; del.textContent = "Sure?"; return; }
+    PERSON_KEYS.forEach(k => raw.del(pkey(k, del.dataset.del)));
+    profiles = profiles.filter(p => p.id !== del.dataset.del);
+    raw.set("profiles", profiles);
+    renderWho();
+  }
+});
+whoPanel.addEventListener("submit", e => {
+  e.preventDefault();
+  const name = document.getElementById("whoName").value.trim();
+  if (!name) return;
+  if (renaming) {
+    profiles.find(p => p.id === profileId).name = name;
+    raw.set("profiles", profiles);
+    renaming = false;
+    renderWho();
+  } else {
+    const p = { id: "p" + Date.now(), name, icon: ICONS[profiles.length % ICONS.length] };
+    profiles.push(p);
+    raw.set("profiles", profiles);
+    switchTo(p.id);
+  }
+});
+renderWho();
+
+/* ---------- homework (set by a grown-up, per person) ---------- */
+let homework = store.get("homework", []);
+const hwBox = document.getElementById("hwBox"), modal = document.getElementById("modal"), modalCard = document.getElementById("modalCard");
+const me = () => profiles.find(p => p.id === profileId);
+const hwSurah = h => SURAHS.find(x => x.id === h.surah);
+const hwRange = h => h.stage == null ? [0, hwSurah(h).ayahs.length - 1] : hwSurah(h).stages[h.stage];
+function hwTitle(h) {
+  const s = hwSurah(h);
+  if (h.stage == null) return s.en;
+  const [a, b] = hwRange(h), off = s.start || 1;
+  return `${s.en}, ayahs ${a + off}–${b + off}`;
+}
+function hwLearned(h) {
+  const l = new Set(progress[h.surah] || []), [a, b] = hwRange(h);
+  let n = 0;
+  for (let i = a; i <= b; i++) if (l.has(i)) n++;
+  return [n, b - a + 1];
+}
+const saveHw = () => store.set("homework", homework);
+function renderHw() {
+  const open = homework.filter(h => !h.done && hwSurah(h)), done = homework.filter(h => h.done && hwSurah(h));
+  hwBox.innerHTML = open.map(h => {
+    const [n, t] = hwLearned(h);
+    return `<button class="hw" data-hw="${h.id}"><span class="hw-tag">📚 Homework</span><span class="hw-title">${esc(hwTitle(h))}</span><span class="hw-count">⭐ ${n} / ${t}</span>${h.note ? `<span class="hw-note">${esc(h.note)}</span>` : ""}</button>`;
+  }).join("") +
+    (done.length ? `<div class="shelf" title="Homework trophies">${done.map(h => `<span title="${esc(hwTitle(h))}">🏆</span>`).join("")}</div>` : "") +
+    '<button class="hw-set" id="hwSetBtn">Set homework (for grown-ups)</button>';
+}
+hwBox.addEventListener("click", e => {
+  const b = e.target.closest("[data-hw]");
+  if (b) {
+    const h = homework.find(x => x.id === b.dataset.hw);
+    openSurah(h.surah);
+    if (h.stage != null) { stage = h.stage; renderAyahs(); }
+  } else if (e.target.closest("#hwSetBtn")) askGrownUp();
+});
+
+function showModal(html) { modalCard.innerHTML = html; modal.classList.remove("hidden"); }
+function closeModal() { modal.classList.add("hidden"); }
+modal.addEventListener("click", e => { if (e.target === modal || e.target.closest("[data-close]")) closeModal(); });
+
+/* a simple sum keeps young children out of the homework settings */
+function askGrownUp() {
+  const a = 6 + Math.floor(Math.random() * 4), b = 6 + Math.floor(Math.random() * 4);
+  showModal(`<h2>For grown-ups</h2><p>What is ${a} × ${b}?</p>
+    <form id="gateForm" class="who-add"><input id="gateAns" inputmode="numeric" autocomplete="off" aria-label="Answer"><button>Go</button></form>
+    <button class="link" data-close>Cancel</button>`);
+  const ans = document.getElementById("gateAns");
+  document.getElementById("gateForm").onsubmit = e => {
+    e.preventDefault();
+    if (+ans.value === a * b) hwEditor();
+    else { ans.value = ""; toast("Not quite! Ask a grown-up 🙂"); }
+  };
+  ans.focus();
+}
+function hwEditor() {
+  const list = homework.filter(h => !h.done && hwSurah(h)).map(h =>
+    `<div class="who-row"><span class="who-pick">${esc(hwTitle(h))}</span><button class="who-x" data-rm="${h.id}">Remove</button></div>`).join("");
+  showModal(`<h2>Homework for ${esc(me().name)}</h2>
+    <form id="hwForm" class="hw-form">
+      <label>Surah <select id="hwSurah">${SURAHS.map(s => `<option value="${s.id}">${s.num} · ${esc(s.en)}</option>`).join("")}</select></label>
+      <label id="hwPartWrap">Part <select id="hwPart"></select></label>
+      <label>Note (optional) <input id="hwNote" maxlength="60" placeholder="e.g. by Friday"></label>
+      <p class="small-note">Stars for these ayahs are cleared so they can be earned again.</p>
+      <button class="big-btn">Set homework</button>
+    </form>
+    ${list ? `<h3>Current homework</h3>${list}` : ""}
+    <button class="link" data-close>Done</button>`);
+  const sel = document.getElementById("hwSurah"), part = document.getElementById("hwPart");
+  const fill = () => {
+    const s = SURAHS.find(x => x.id === sel.value), off = s.start || 1;
+    part.innerHTML = '<option value="">Whole surah</option>' + (s.stages || []).map(([a, b], k) => `<option value="${k}">Ayahs ${a + off}–${b + off}</option>`).join("");
+    document.getElementById("hwPartWrap").classList.toggle("hidden", !s.stages);
+  };
+  sel.onchange = fill;
+  fill();
+  document.getElementById("hwForm").onsubmit = e => {
+    e.preventDefault();
+    const h = { id: "h" + Date.now(), surah: sel.value, stage: part.value === "" ? null : +part.value, note: document.getElementById("hwNote").value.trim(), done: null };
+    const [a, b] = hwRange(h);
+    progress[h.surah] = (progress[h.surah] || []).filter(i => i < a || i > b);
+    store.set("progress", progress);
+    homework.push(h);
+    saveHw(); renderHome(); hwEditor();
+    toast("📚 Homework set!");
+  };
+  modalCard.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => {
+    homework = homework.filter(h => h.id !== b.dataset.rm);
+    saveHw(); renderHome(); hwEditor();
+  });
+}
+
+/* the special reward when homework is finished */
+function checkHomework() {
+  let finished = false;
+  for (const h of homework) {
+    if (h.done || h.surah !== surah.id) continue;
+    const [n, t] = hwLearned(h);
+    if (n === t) { h.done = Date.now(); finished = true; saveHw(); reward(h); }
+  }
+  return finished;
+}
+function reward(h) {
+  const total = homework.filter(x => x.done).length;
+  celebrate(60);
+  showModal(`<div class="trophy">🏆</div><h2>Homework complete!</h2>
+    <p>MashaAllah ${esc(me().name)}! You finished ${esc(hwTitle(h))}.</p>
+    <p class="shelf-big">${"🏆".repeat(Math.min(total, 20))}</p>
+    <p>You have ${total} homework ${total === 1 ? "trophy" : "trophies"}!</p>
+    <button class="big-btn" data-close>Yay! ✨</button>`);
+}
+
 /* ---------- start ---------- */
 renderHome();
-const startId = location.hash.slice(1);
+const startId = location.hash.slice(1) || store.get("last", "");
 if (SURAHS.some(s => s.id === startId)) { history.replaceState(null, "", location.pathname); openSurah(startId); }
 </script>
 </body>
