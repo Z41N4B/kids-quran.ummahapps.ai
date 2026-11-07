@@ -268,6 +268,7 @@ document.getElementById("homeTabs").addEventListener("click", e => {
   .group { display: flex; align-items: center; gap: 6px; background: #f3effa; padding: 6px 8px; border-radius: 999px; }
   .group span { font-size: .95rem; color: var(--ink-soft); padding: 0 4px; }
   .chip { background: #fff; color: var(--ink); font-weight: 600; min-width: 40px; height: 40px; border-radius: 999px; padding: 0 10px; font-size: 1rem; }
+  #needChips .chip:not(.on) { background: #f3effa; }
   .chip.on { background: var(--accent); color: #fff; }
   .toggle { background: #f3effa; color: var(--ink); font-weight: 600; padding: 10px 16px; border-radius: 999px; font-size: 1rem; }
   .toggle.on { background: var(--ink); color: #fff; }
@@ -809,11 +810,12 @@ let profileId = raw.get("profile", profiles[0].id);
 if (!profiles.some(p => p.id === profileId)) profileId = profiles[0].id;
 // the first person keeps the original keys, so progress saved before profiles existed isn't lost
 const pkey = (k, id = profileId) => id === "p0" ? k : id + ":" + k;
-const PERSON_KEYS = ["progress", "repeat", "theme", "slow", "en", "homeTab", "last", "homework", "heard"];
+const PERSON_KEYS = ["progress", "repeat", "theme", "slow", "en", "homeTab", "last", "homework", "heard", "need"];
 const store = { get: (k, d) => raw.get(pkey(k), d), set: (k, v) => raw.set(pkey(k), v) };
 let progress = store.get("progress", {});
 /* how many times each ayah has been listened to all the way through; a star needs NEED listens */
-const NEED = 3;
+let NEED = store.get("need", 3); // set by a grown-up
+const times = n => n === 1 ? "once" : n + " times";
 let heard = store.get("heard", {});
 const heardOf = i => (heard[surah.id] || [])[i] || 0;
 const ears = i => { const n = Math.min(heardOf(i), NEED); return "🎧 " + "●".repeat(n) + "○".repeat(NEED - n); };
@@ -979,7 +981,7 @@ function addHeard(i) {
   if (st && !st.classList.contains("on")) {
     e.textContent = ears(i);
     if (a[i] >= NEED) st.classList.remove("locked");
-    if (a[i] === NEED && !playingAll) toast("🎧 Listened 3 times! Now try saying it yourself, then tap ⭐");
+    if (a[i] === NEED && !playingAll) toast(`🎧 Listened ${times(NEED)}! Now try saying it yourself, then tap ⭐`);
   }
   practisedToday(i);
 }
@@ -990,7 +992,7 @@ function toggleLearned(i) {
     // step 1: listen enough times
     if (heardOf(i) < NEED) {
       btn.classList.remove("shake"); void btn.offsetWidth; btn.classList.add("shake");
-      return toast(`🎧 Listen ${NEED} times first (${heardOf(i)} / ${NEED}). Tap ▶`);
+      return toast(`🎧 Listen ${times(NEED)} first (${heardOf(i)} / ${NEED}). Tap ▶`);
     }
     // step 2: hide the words and say it from memory
     if (!row.classList.contains("recall")) {
@@ -1270,6 +1272,10 @@ function hwEditor() {
   const list = homework.filter(h => !h.done && hwSurah(h)).map(h =>
     `<div class="who-row"><span class="who-pick">${esc(hwTitle(h))}</span><button class="who-x" data-rm="${h.id}">Remove</button></div>`).join("");
   showModal(`<h2>Homework for ${esc(me().name)}</h2>
+    <h3>Listens before a star</h3>
+    <div id="needChips" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">${[1, 3, 5, 7, 10].map(n => `<button class="chip ${n === NEED ? "on" : ""}" data-need="${n}">${n}</button>`).join("")}</div>
+    <p class="small-note">How many times ${esc(me().name)} must listen to each line before they can earn its star.</p>
+    <h3>New homework</h3>
     <form id="hwForm" class="hw-form">
       <label>Surah <select id="hwSurah">${SURAHS.map(s => `<option value="${s.id}">${s.num} · ${esc(s.en)}</option>`).join("")}</select></label>
       <label id="hwPartWrap">Part <select id="hwPart"></select></label>
@@ -1286,6 +1292,11 @@ function hwEditor() {
     document.getElementById("hwPartWrap").classList.toggle("hidden", !s.stages);
   };
   sel.onchange = fill;
+  modalCard.querySelectorAll("[data-need]").forEach(c => c.onclick = () => {
+    NEED = +c.dataset.need; store.set("need", NEED);
+    modalCard.querySelectorAll("[data-need]").forEach(x => x.classList.toggle("on", x === c));
+    toast(`🎧 Now ${times(NEED)} for each line`);
+  });
   fill();
   document.getElementById("hwForm").onsubmit = e => {
     e.preventDefault();
