@@ -346,6 +346,7 @@ document.getElementById("homeTabs").addEventListener("click", e => {
   .act.play.on { background: var(--accent); color: #fff; }
   .act.star { font-size: 1.4rem; filter: grayscale(1) opacity(.5); }
   .act.star.on { filter: none; background: #fff3c4; }
+  .ears .e-on { color: #f5a300; }
   .ears { font-size: .8rem; letter-spacing: 1px; align-self: center; color: var(--ink-soft); white-space: nowrap; }
   .act.star.locked { opacity: .55; }
   .act.star.check { background: #d9f7e3; filter: none; font-size: 1rem; }
@@ -818,7 +819,7 @@ let NEED = store.get("need", 3); // set by a grown-up
 const times = n => n === 1 ? "once" : n + " times";
 let heard = store.get("heard", {});
 const heardOf = i => (heard[surah.id] || [])[i] || 0;
-const ears = i => { const n = Math.min(heardOf(i), NEED); return "🎧 " + "●".repeat(n) + "○".repeat(NEED - n); };
+const ears = i => { const n = Math.min(heardOf(i), NEED); return '🎧 <span class="e-on">' + "★".repeat(n) + "</span>" + "☆".repeat(NEED - n); };
 let repeat = store.get("repeat", 3);
 
 /* ---------- themes ---------- */
@@ -979,7 +980,7 @@ function addHeard(i) {
   store.set("heard", heard);
   const e = document.getElementById("ears-" + i), st = ayahBox.querySelector(`[data-star="${i}"]`);
   if (st && !st.classList.contains("on")) {
-    e.textContent = ears(i);
+    e.innerHTML = ears(i);
     if (a[i] >= NEED) st.classList.remove("locked");
     if (a[i] === NEED && !playingAll) toast(`🎧 Listened ${times(NEED)}! Now try saying it yourself, then tap ⭐`);
   }
@@ -1008,7 +1009,7 @@ function toggleLearned(i) {
   store.set("progress", progress);
   row.classList.toggle("learned", list.has(i));
   btn.classList.toggle("on", list.has(i));
-  document.getElementById("ears-" + i).textContent = list.has(i) ? "" : ears(i);
+  document.getElementById("ears-" + i).innerHTML = list.has(i) ? "" : ears(i);
   if (list.has(i) && checkHomework()) return;
   if (list.has(i)) {
     if (list.size === surah.ayahs.length) { celebrate(30); toast(`🏆 MashaAllah! You learned all of ${surah.en}!`); }
