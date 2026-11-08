@@ -1052,10 +1052,22 @@ function playAyah(i, all) {
   if (!audio.src.endsWith(file)) audio.src = file;
   startCurrent();
 }
+let listened = 0, lastT = null;
+audio.addEventListener("timeupdate", () => {
+  const d = audio.currentTime - lastT;
+  if (lastT != null && !audio.paused && d > 0 && d < 1.5) listened += d; // jumps forward are not counted
+  lastT = audio.currentTime;
+});
+function fullyPlayed() {
+  const start = surah.clips ? surah.clips.times[current] : 0;
+  const end = surah.clips && surah.clips.times[current + 1] != null ? surah.clips.times[current + 1] : audio.duration;
+  return isFinite(end) && listened >= (end - start) * 0.8;
+}
 function startCurrent() {
   highlight();
   const t = surah.clips ? surah.clips.times[current] : 0;
-  const go = () => { audio.currentTime = t; audio.playbackRate = rate; audio.play().catch(() => {}); };
+  listened = 0; lastT = null;
+  const go = () => { audio.currentTime = t; lastT = t; audio.playbackRate = rate; audio.play().catch(() => {}); };
   audio.readyState >= 1 ? go() : audio.addEventListener("loadedmetadata", go, { once: true });
 }
 /* for clip-based surahs, stop when the part's end time is reached */
@@ -1090,13 +1102,14 @@ function stopAudio() {
 audio.addEventListener("ended", partEnded);
 function partEnded() {
   if (current === -2) return playingAll ? setTimeout(() => playAyah(0, true), 500) : stopAudio();
-  addHeard(current);
+  if (fullyPlayed()) addHeard(current); else roundOk = false;
   timesLeft--;
   if (timesLeft > 0) return setTimeout(startCurrent, 600);
   if (playingAll && current < stageRange()[1]) {
     const next = current + 1;
     return setTimeout(() => playAyah(next, true), 700);
   }
+  if (playingAll && roundOk) roundDone();
   // Play all: go round the whole part again
   if (playingAll && --roundsLeft > 0) return setTimeout(startRound, 1500);
   stopAudio();
@@ -1106,7 +1119,8 @@ audio.addEventListener("error", () => {
   toast(`🎧 Recording for ${surah.unit.toLowerCase()} ${label(current)} is coming soon!`);
   stopAudio();
 });
-const startRound = () => surah.basmala && stageRange()[0] === 0 ? playBasmala(true) : playAyah(stageRange()[0], true);
+let roundOk = false;
+const startRound = () => (roundOk = true) && surah.basmala && stageRange()[0] === 0 ? playBasmala(true) : playAyah(stageRange()[0], true);
 document.getElementById("playAll").onclick = () => { if (playingAll) return stopAudio(); roundsLeft = repeat; startRound(); };
 
 /* Bismillah before each surah, using the recitation from Al-Fatiha */
@@ -1223,6 +1237,25 @@ function hwTitle(h) {
   const [a, b] = hwRange(h), off = s.start || 1;
   return `${s.en}, ayahs ${a + off}–${b + off}`;
 }
+/* homework plays: counted per part, so a whole long surah needs every part played */
+const hwKeys = h => {
+  const s = hwSurah(h);
+  if (!s.stages) return ["all"];
+  const [a, b] = hwRange(h);
+  return s.stages.map((r, k) => r[1] >= a && r[0] <= b ? String(k) : null).filter(k => k != null);
+};
+const hwPlays = h => Math.min(...hwKeys(h).map(k => (h.plays || {})[k] || 0));
+function roundDone() {
+  const key = surah.stages ? String(stage) : "all";
+  for (const h of homework) {
+    if (h.done || h.surah !== surah.id || !h.needPlays || !hwKeys(h).includes(key)) continue;
+    h.plays = h.plays || {};
+    h.plays[key] = (h.plays[key] || 0) + 1;
+    saveHw();
+    toast(`▶ Played all the way through! (${Math.min(hwPlays(h), h.needPlays)} / ${h.needPlays})`);
+  }
+  checkHomework(true);
+}
 function hwLearned(h) {
   const l = new Set(progress[h.surah] || []), [a, b] = hwRange(h);
   let n = 0;
@@ -1235,7 +1268,7 @@ function renderHw() {
   hwBox.innerHTML = open.map(h => {
     const [n, t] = hwLearned(h);
     const days = (h.days || []).length;
-    return `<button class="hw ${h.ready ? "ready" : ""}" data-hw="${h.id}"><span class="hw-tag">${h.ready ? "🎤 Ready! Recite it to a grown-up" : "📚 Homework"}</span><span class="hw-title">${esc(hwTitle(h))}</span><span class="hw-count">⭐ ${n} / ${t}</span><span class="hw-bar"><i style="width:${Math.round(100 * n / t)}%"></i><b>🎁</b></span>${days ? `<span class="hw-days">🔥 Practised on ${days} ${days === 1 ? "day" : "days"}</span>` : ""}${h.note ? `<span class="hw-note">${esc(h.note)}</span>` : ""}</button>`;
+    return `<button class="hw ${h.ready ? "ready" : ""}" data-hw="${h.id}"><span class="hw-tag">${h.ready ? "🎤 Ready! Recite it to a grown-up" : "📚 Homework"}</span><span class="hw-title">${esc(hwTitle(h))}</span><span class="hw-count">⭐ ${n} / ${t}${h.needPlays ? ` · ▶ ${Math.min(hwPlays(h), h.needPlays)} / ${h.needPlays}` : ""}</span><span class="hw-bar"><i style="width:${Math.round(100 * n / t)}%"></i><b>🎁</b></span>${days ? `<span class="hw-days">🔥 Practised on ${days} ${days === 1 ? "day" : "days"}</span>` : ""}${h.note ? `<span class="hw-note">${esc(h.note)}</span>` : ""}</button>`;
   }).join("") +
     (done.length ? `<div class="shelf" title="Homework trophies">${done.map(h => `<span title="${esc(hwTitle(h))}">${h.prize || "🏆"}</span>`).join("")}</div>` : "") +
     '<button class="hw-set" id="hwSetBtn">Set homework (for grown-ups)</button>';
@@ -1279,6 +1312,7 @@ function hwEditor() {
     <form id="hwForm" class="hw-form">
       <label>Surah <select id="hwSurah">${SURAHS.map(s => `<option value="${s.id}">${s.num} · ${esc(s.en)}</option>`).join("")}</select></label>
       <label id="hwPartWrap">Part <select id="hwPart"></select></label>
+      <label>Play it all the way through (with ▶ Play all) <select id="hwPlays">${[0, 1, 3, 5, 7, 10].map(n => `<option value="${n}">${n ? n + (n === 1 ? " time" : " times") : "Not needed"}</option>`).join("")}</select></label>
       <label>Note (optional) <input id="hwNote" maxlength="60" placeholder="e.g. by Friday"></label>
       <p class="small-note">Stars for these ayahs are cleared so they can be earned again.</p>
       <button class="big-btn">Set homework</button>
@@ -1300,7 +1334,7 @@ function hwEditor() {
   fill();
   document.getElementById("hwForm").onsubmit = e => {
     e.preventDefault();
-    const h = { id: "h" + Date.now(), surah: sel.value, stage: part.value === "" ? null : +part.value, note: document.getElementById("hwNote").value.trim(), done: null };
+    const h = { id: "h" + Date.now(), surah: sel.value, stage: part.value === "" ? null : +part.value, note: document.getElementById("hwNote").value.trim(), needPlays: +document.getElementById("hwPlays").value, plays: {}, done: null };
     const [a, b] = hwRange(h);
     progress[h.surah] = (progress[h.surah] || []).filter(i => i < a || i > b);
     store.set("progress", progress);
@@ -1331,14 +1365,17 @@ function practisedToday(i) {
 
 /* all stars earned: the child recites to a grown-up, who gives the prize */
 const PRIZES = ["🏆", "🥇", "👑", "🦁", "🚀", "🦄", "🐳", "💎", "🌟", "🏅", "🐘", "🦋"];
-function checkHomework() {
-  let ready = null;
+function checkHomework(fromRound) {
+  let ready = null, waiting = false;
   for (const h of homework) {
     if (h.done || h.ready || h.surah !== surah.id) continue;
     const [n, t] = hwLearned(h);
-    if (n === t) { h.ready = true; saveHw(); ready = h; }
+    if (n !== t) continue;
+    const left = (h.needPlays || 0) - hwPlays(h);
+    if (left > 0) { if (!fromRound) { waiting = true; celebrate(10); } if (!fromRound) toast(`⭐ All stars! Now press ▶ Play all and listen all the way through ${left === 1 ? "1 more time" : left + " more times"}`); continue; }
+    h.ready = true; saveHw(); ready = h;
   }
-  if (!ready) return false;
+  if (!ready) return waiting;
   celebrate(25);
   showModal(`<div class="trophy">🎁</div><h2>All stars! ⭐</h2>
     <p>MashaAllah ${esc(me().name)}! Now recite <b>${esc(hwTitle(ready))}</b> to a grown-up, without looking, to open your surprise.</p>
