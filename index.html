@@ -1052,7 +1052,10 @@ function playAyah(i, all) {
   const file = surah.clips ? surah.clips.file : src(surah.id, i);
   if (!audio.src.endsWith(file)) audio.src = file;
   startCurrent();
+  // load the next ayah while this one plays, so Play all flows without a pause
+  if (all && !surah.clips && i < stageRange()[1]) preload.src = src(surah.id, i + 1);
 }
+const preload = new Audio(); preload.preload = "auto";
 let listened = 0, lastT = null;
 audio.addEventListener("timeupdate", () => {
   const d = audio.currentTime - lastT;
@@ -1102,13 +1105,13 @@ function stopAudio() {
 }
 audio.addEventListener("ended", partEnded);
 function partEnded() {
-  if (current === -2) return playingAll ? setTimeout(() => playAyah(0, true), 500) : stopAudio();
+  if (current === -2) return playingAll ? playAyah(stageRange()[0], true) : stopAudio();
   if (fullyPlayed()) addHeard(current); else roundOk = false;
   timesLeft--;
   if (timesLeft > 0) return setTimeout(startCurrent, 600);
   if (playingAll && current < stageRange()[1]) {
     const next = current + 1;
-    return setTimeout(() => playAyah(next, true), 700);
+    return playAyah(next, true); // straight on, no gap
   }
   if (playingAll && roundOk) roundDone();
   // Play all: go round the whole part again
@@ -1129,6 +1132,7 @@ const basmalaEl = document.getElementById("basmala");
 function playBasmala(all) {
   playingAll = all; current = -2;
   audio.src = "audio/fatiha/1.mp3";
+  if (all && !surah.clips) preload.src = src(surah.id, stageRange()[0]);
   audio.playbackRate = rate;
   highlight();
   audio.play().catch(() => {});
